@@ -1,0 +1,119 @@
+{
+      "name" : "{{index_name}}",
+      "fields": [
+        { "name": "id", "type": "Edm.String", "key": true, "searchable": false },
+        { "name": "path", "type": "Edm.String", "key": false, "searchable": true },
+        { "name": "barcodes", "type": "Collection(Edm.ComplexType)",
+              "fields": [
+                { "name": "text", "type": "Edm.String", "searchable": true},
+                { "name": "timestamps", "type": "Collection(Edm.ComplexType)",
+                  "fields": [
+                    { "name": "start", "type": "Edm.String", "searchable": false},
+                    { "name": "end", "type": "Edm.String", "searchable": false}
+                  ]
+                }
+              ]
+        },
+        { "name": "transcripts", "type": "Collection(Edm.ComplexType)",
+              "fields": [
+                { "name": "text", "type": "Edm.String", "searchable": true},
+                { "name": "timestamps", "type": "Collection(Edm.ComplexType)",
+                  "fields": [
+                    { "name": "start", "type": "Edm.String", "searchable": false},
+                    { "name": "end", "type": "Edm.String", "searchable": false}
+                  ]
+                }
+              ]
+        },
+        { "name": "ocr", "type": "Collection(Edm.ComplexType)",
+              "fields": [
+                { "name": "text", "type": "Edm.String", "searchable": true},
+                { "name": "timestamps", "type": "Collection(Edm.ComplexType)",
+                  "fields": [
+                    { "name": "start", "type": "Edm.String", "searchable": false},
+                    { "name": "end", "type": "Edm.String", "searchable": false}
+                  ]
+                }
+              ]
+        },
+        { "name": "keywords", "type": "Collection(Edm.ComplexType)",
+              "fields": [
+                { "name": "text", "type": "Edm.String", "searchable": true},
+                { "name": "timestamps", "type": "Collection(Edm.ComplexType)",
+                  "fields": [
+                    { "name": "start", "type": "Edm.String", "searchable": false},
+                    { "name": "end", "type": "Edm.String", "searchable": false}
+                  ]
+                }
+              ]
+        },
+        { "name": "topics", "type": "Collection(Edm.ComplexType)",
+              "fields": [
+                { "name": "text", "type": "Edm.String", "searchable": true},
+                { "name": "reference", "type": "Edm.String", "searchable": true},
+                { "name": "referenceURL", "type": "Edm.String", "searchable": true},
+                { "name": "referenceType", "type": "Edm.String", "searchable": true},
+                { "name": "timestamps", "type": "Collection(Edm.ComplexType)",
+                  "fields": [
+                    { "name": "start", "type": "Edm.String", "searchable": false},
+                    { "name": "end", "type": "Edm.String", "searchable": false}
+                  ]
+                }
+              ]
+        },
+        { "name": "faces", "type": "Collection(Edm.ComplexType)",
+              "fields": [
+                { "name": "text", "type": "Edm.String", "searchable": true},
+                { "name": "timestamps", "type": "Collection(Edm.ComplexType)",
+                  "fields": [
+                    { "name": "start", "type": "Edm.String", "searchable": false},
+                    { "name": "end", "type": "Edm.String", "searchable": false}
+                  ]
+                }
+              ]
+        },
+        { "name": "labels", "type": "Collection(Edm.ComplexType)",
+              "fields": [
+                { "name": "text", "type": "Edm.String", "searchable": true},
+                { "name": "timestamps", "type": "Collection(Edm.ComplexType)",
+                  "fields": [
+                    { "name": "start", "type": "Edm.String", "searchable": false},
+                    { "name": "end", "type": "Edm.String", "searchable": false}
+                  ]
+                }
+              ]
+        },
+        { "name": "brands", "type": "Collection(Edm.ComplexType)",
+              "fields": [
+                { "name": "text", "type": "Edm.String", "searchable": true},
+                { "name": "reference", "type": "Edm.String", "searchable": true},
+                { "name": "referenceURL", "type": "Edm.String", "searchable": true},
+                { "name": "description", "type": "Edm.String", "searchable": true},
+                { "name": "timestamps", "type": "Collection(Edm.ComplexType)",
+                  "fields": [
+                    { "name": "start", "type": "Edm.String", "searchable": false},
+                    { "name": "end", "type": "Edm.String", "searchable": false}
+                  ]
+                }
+              ]
+        },
+        { "name": "header", "type": "Edm.ComplexType",
+              "fields": [
+                { "name": "owner", "type": "Edm.String", "searchable": true},
+                { "name": "creation_date", "type": "Edm.String", "searchable": true},
+                { "name": "name", "type": "Edm.String", "searchable": true},
+                { "name": "description", "type": "Edm.String", "searchable": true},
+                { "name": "thumbnail", "type": "Edm.String", "searchable": true}
+              ]
+        },
+        { "name": "metadata", "type": "Collection(Edm.ComplexType)",
+          "fields": [
+            { "name": "key", "type": "Edm.String", "searchable": false},
+            { "name": "value", "type": "Edm.String", "searchable": true}
+          ]
+        },
+        { "name": "content", "type": "Edm.String", "searchable": true, "filterable": false, "sortable": false, "facetable": false }
+      ]
+}
+
+

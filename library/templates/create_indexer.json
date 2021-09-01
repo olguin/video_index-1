@@ -1,0 +1,59 @@
+{
+  "name": "{{indexer_name}}",
+  "dataSourceName" : "{{datasource_name}}",
+  "targetIndexName" : "{{target_index}}",
+  "schedule" : { "interval" : "PT2H" },
+  "skillsetName": "{{skillset_name}}",
+  "fieldMappings" : [
+    { "sourceFieldName" : "metadata_storage_name", "targetFieldName" : "id", "mappingFunction" : { "name" : "base64Encode" } },
+    { "sourceFieldName" : "metadata_storage_path", "targetFieldName" : "path" }
+  ],
+  "outputFieldMappings": [
+        {
+            "sourceFieldName": "/document/barcodes/*",
+            "targetFieldName": "barcodes"
+        },
+        {
+            "sourceFieldName": "/document/transcripts/*",
+            "targetFieldName": "transcripts"
+        },
+        {
+            "sourceFieldName": "/document/ocr/*",
+            "targetFieldName": "ocr"
+        },
+        {
+            "sourceFieldName": "/document/keywords/*",
+            "targetFieldName": "keywords"
+        },
+        {
+            "sourceFieldName": "/document/topics/*",
+            "targetFieldName": "topics"
+        },
+        {
+            "sourceFieldName": "/document/faces/*",
+            "targetFieldName": "faces"
+        },
+        {
+            "sourceFieldName": "/document/labels/*",
+            "targetFieldName": "labels"
+        },
+        {
+            "sourceFieldName": "/document/brands/*",
+            "targetFieldName": "brands"
+        },
+        {
+            "sourceFieldName": "/document/metadata",
+            "targetFieldName": "metadata"
+        },
+        {
+            "sourceFieldName": "/document/header",
+            "targetFieldName": "header"
+        }
+
+
+
+
+    ],
+
+  "parameters" : { "configuration" : { "failOnUnsupportedContentType" : false, "failOnUnprocessableDocument" : false,  "dataToExtract" : "contentAndMetadata", "indexedFileNameExtensions" : "mp4,mov,MOV", "indexStorageMetadataOnlyForOversizedDocuments": true  } }
+}

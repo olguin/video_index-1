@@ -1,0 +1,94 @@
+{
+  "@odata.context": "https://demo-qr-code-cognitive-search.search.windows.net/$metadata#skillsets/$entity",
+  "@odata.etag": "\"0x8D94CD3E03FB4AC\"",
+  "name": "{{skillset_name}}",
+  "description": "Video indexer skillset",
+  "skills": [
+    {
+      "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
+      "name": "#1",
+      "description": "Barcode detection skill",
+      "context": "/document",
+      "uri": "https://{{function_app}}.azurewebsites.net/api/QrScanner",
+      "httpMethod": "POST",
+      "timeout": "PT30S",
+      "batchSize": 1,
+      "degreeOfParallelism": null,
+      "inputs": [
+        {
+          "name": "video_file_path",
+          "source": "/document/metadata_storage_path"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "barcodes",
+          "targetName": "barcodes"
+        }
+      ],
+      "httpHeaders": {}
+    },
+
+{
+      "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
+      "description": "Azure video indexer skillset",
+      "uri": "https://{{function_app}}.azurewebsites.net/api/VideoIndexerSkill",
+      "batchSize":1,
+      "context": "/document",
+      "timeout": "PT230S",
+      "inputs": [
+        {
+          "name": "video_file_path", "source": "/document/metadata_storage_path"
+        }
+      ],
+      "outputs": [
+        {
+            "name": "transcripts",
+            "targetName": "transcripts"
+        },
+        {
+            "name": "ocr",
+            "targetName": "ocr"
+        },
+        {
+            "name": "keywords",
+            "targetName": "keywords"
+        },
+        {
+            "name": "topics",
+            "targetName": "topics"
+        },
+        {
+            "name": "faces",
+            "targetName": "faces"
+        },
+        {
+            "name": "labels",
+            "targetName": "labels"
+        },
+        {
+            "name": "brands",
+            "targetName": "brands"
+        },
+        {
+            "name": "metadata",
+            "targetName": "metadata"
+        },
+        {
+            "name": "header",
+            "targetName": "header"
+        }
+
+
+
+
+
+
+      ]
+    }
+  ],
+  "cognitiveServices": null,
+  "knowledgeStore": null,
+  "encryptionKey": null
+}
+

@@ -1,0 +1,6 @@
+{
+    "name" : "{{datasource_name}}",
+    "type" : "azureblob",
+    "credentials" : { "connectionString" : "DefaultEndpointsProtocol=https;AccountName={{account_name}};AccountKey={{account_key}};EndpointSuffix=core.windows.net" },
+    "container" : { "name" : "{{container}}"}
+}

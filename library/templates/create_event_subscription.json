@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "destination": {
+      "endpointType": "AzureFunction",
+      "properties": {
+        "resourceId": "{{function_id}}"
+      }
+    }
+  }
+}
