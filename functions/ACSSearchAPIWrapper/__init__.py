@@ -41,6 +41,21 @@ def find_text_matching_highlights(current_field,text, highlights):
         else:
             return matching_highlights[0]
 
+def addTitles(search_result):
+    titles = {
+        "barcodes": "Barcodes",
+        "transcripts": "Speech recognition",
+        "ocr": "On screen text",
+        "keywords": "Keywords",
+        "topics": "Topics",
+        "faces": "Recognized people",
+        "labels": "Labels",
+        "brands": "Brands",
+        "header": "Video information",
+        "metadata": "Video metadata"
+    }
+    search_result["titles"] = titles
+
 def process_highlights(record, process_record, field_path, highlights, matches_count, root_field):
     current_field = field_path[0]
     subrecord = record[current_field]
@@ -171,6 +186,7 @@ def search_from_json(params):
             processed_records.append(add_missing_match_counts(record,{}))
 
     search_result["value"] = processed_records
+    addTitles(search_result)
     return search_result
 
 def test_search(service,index,key,api_version,params):

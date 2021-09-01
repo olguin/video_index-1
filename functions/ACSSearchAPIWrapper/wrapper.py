@@ -36,6 +36,21 @@ def find_text_matching_highlights(current_field,text, highlights):
         else:
             return matching_highlights[0]
 
+def addTitles(search_result):
+    titles = {
+        "barcodes": "Barcodes",
+        "transcripts": "Speech recognition",
+        "ocr": "On screen text",
+        "keywords": "Keywords",
+        "topics": "Topics",
+        "faces": "Recognized people",
+        "labels": "Labels",
+        "brands": "Brands",
+        "header": "Video information",
+        "metadata": "Video metadata"
+    }
+    search_result["titles"] = titles
+
 def process_highlights(record, process_record, field_path, highlights, matches_count, root_field):
     current_field = field_path[0]
     subrecord = record[current_field]
@@ -68,12 +83,12 @@ def add_highlighted_subrecord(processed_record, field_path, highlighted_subrecor
         processed_record[current_field] = processed_record.get(current_field, {})
         add_highlighted_subrecord(processed_record[current_field], field_path[1:], highlighted_subrecord)
 
-def copy_relevant_metadata(record, processed_record):
-    processed_record["blob_metadata"] = processed_record.get("blob_metadata", {})
-    fields = ["creation_date", "description", "name", "owner", "thumbnail", "metadata"]
+def copy_header(record, processed_record):
+    processed_record["header"] = processed_record.get("header", {})
+    fields = ["creation_date", "description", "name", "owner", "thumbnail"]
     for field in fields:
-        if(not field in processed_record["blob_metadata"]):
-            processed_record["blob_metadata"][field] = record["blob_metadata"][field]
+        if(not field in processed_record["header"]):
+            processed_record["header"][field] = record["header"][field]
     
 def add_missing_match_counts(processed_record,match_count):
     for field,values in processed_record.items():
@@ -91,7 +106,7 @@ def process_record(record):
         root_field=field_path[0]
         highlighted_subrecord = process_highlights(record, {}, field_path, highlights, matches_count, root_field)
         add_highlighted_subrecord(processed_record, field_path, highlighted_subrecord)
-    copy_relevant_metadata(record, processed_record)
+    copy_header(record, processed_record)
     add_missing_match_counts(processed_record,matches_count)
     processed_record["match_count"] = matches_count
 
@@ -166,6 +181,7 @@ def search_from_json(params):
             processed_records.append(add_missing_match_counts(record,{}))
 
     search_result["value"] = processed_records
+    addTitles(search_result)
     return search_result
 
 def test_search(service,index,key,api_version,params):
