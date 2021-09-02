@@ -4,7 +4,7 @@ import json
 params = {
   "key": "2BE17B570160879C22C41F85F128BD53",
   "api_version":"2020-06-30",
-  "search": "microsoft",
+  "search": "*",
   "service": "dtdvss",
   "index":  "development-container-in"
 }

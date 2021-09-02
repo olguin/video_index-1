@@ -44,11 +44,11 @@ def find_text_matching_highlights(current_field,text, highlights):
 def addTitles(search_result):
     titles = {
         "barcodes": "Barcodes",
-        "transcripts": "Speech recognition",
-        "ocr": "On screen text",
+        "transcripts": "Transcript",
+        "ocr": "On-Screen Text",
         "keywords": "Keywords",
         "topics": "Topics",
-        "faces": "Recognized people",
+        "faces": "Faces",
         "labels": "Labels",
         "brands": "Brands",
         "header": "Video information",
@@ -97,7 +97,7 @@ def copy_header(record, processed_record):
     
 def add_missing_match_counts(processed_record,match_count):
     for field,values in processed_record.items():
-        if(not (field in match_count) and hasattr(values, '__len__')):
+        if(not (field in match_count) and hasattr(values, '__len__') and type(values) == type([])):
             match_count[field] = len(values)
     processed_record["match_count"] = match_count
     return processed_record
