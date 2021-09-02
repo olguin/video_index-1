@@ -116,11 +116,12 @@ def buildInfrastructure(security_info, container_to_index_info, prefix, location
 #    "tenant": "639be87d-9250-4b32-afb6-3ec84932b34b"
 #}
 
-security_info = {
+security_info = { 
   "appId": "26a41b49-d23f-4524-8ae7-7f6222919847",
-  "password": "Iq-0pCY1CbrwgD_710_qEeMQqe5UmrC4BQ",
+  "password": "WFTKC_fNkwq6Nh.Yylg-es2yilXLWziVsw",
   "tenant": "639be87d-9250-4b32-afb6-3ec84932b34b"
 }
+
 
 #container_to_index_info = {
 #    "subscriptionId": "5b541c4d-ec9c-4e4e-a6d4-e95ce20e55ef",
@@ -129,16 +130,24 @@ security_info = {
 #    "container": "videosearchcontainer",
 #}
 
+#container_to_index_info = {
+#    "subscriptionId": "898225fb-0fa0-4180-82b0-c3c103ade9a4",
+#    "storageAccount": "developmentsc",
+#    "storageAccountGroup": "development-rg",
+#    "container": "development-container",
+#    "storageAccountKey": 'hUOM+L7VbCfqbUsmrBGsDgb/XvQhT9Ok+LSvlr0NPUZ+xzoS9RKwMQlVRmDvobFC6A2VohcZumCp/XjJOXDlYg=='
+#}
+
 container_to_index_info = {
     "subscriptionId": "898225fb-0fa0-4180-82b0-c3c103ade9a4",
-    "storageAccount": "developmentsc",
-    "storageAccountGroup": "development-rg",
-    "container": "development-container",
-    "storageAccountKey": 'hUOM+L7VbCfqbUsmrBGsDgb/XvQhT9Ok+LSvlr0NPUZ+xzoS9RKwMQlVRmDvobFC6A2VohcZumCp/XjJOXDlYg=='
+    "storageAccount": "demosc",
+    "storageAccountGroup": "demo-rg",
+    "container": "demo-container",
+    "storageAccountKey": 'ueblVx4vh0U8qMMMPXOK6mq6auwKya0tEFsS1DU6UoRh1HDMMRlG5hyqT2XY1IyC8FiADfRcDbjhk7V2idBEoA=='
 }
 
 
-prefix="dtdv"
+prefix="dtdemo"
 location="eastus"
 buildInfrastructure(security_info, container_to_index_info, prefix, location)
 

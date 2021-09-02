@@ -1,6 +1,6 @@
 import json
 import jinja2 
-import grequests
+import requests
 import logging
 
 
@@ -39,16 +39,14 @@ def createEventSubscription(token, subscriptionId, indexingFunctionIdentifier,ev
     createEventSubscriptionURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{storageAccountResourceGroup}/providers/Microsoft.Storage/storageAccounts/{storageAccount}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}?api-version=2021-06-01-preview"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
     eventSubscriptionJson = createEventSubscriptionJSON(indexingFunctionIdentifier)
-    req = grequests.put(createEventSubscriptionURL,data=eventSubscriptionJson,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.put(createEventSubscriptionURL,data=eventSubscriptionJson,headers=headers)
     checkErrors(createEventSubscriptionURL, res)
     return json.loads(res.content.decode("utf-8"))
 
 def getEventSubscription(token, subscriptionId, indexingFunctionIdentifier,eventSubscriptionName,storageAccountResourceGroup,storageAccount):
     getEventSubscriptionURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{storageAccountResourceGroup}/providers/Microsoft.Storage/storageAccounts/{storageAccount}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}?api-version=2021-06-01-preview"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
-    req = grequests.get(getEventSubscriptionURL,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.get(getEventSubscriptionURL,headers=headers)
     checkErrors(getEventSubscriptionURL,res)
     return json.loads(res.content.decode("utf-8"))
 
@@ -69,8 +67,7 @@ def createSystemTopic(token, subscriptionId, resourceGroupName, storageAccountNa
     createSystemTopicURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{topicName}?api-version={apiVersion}"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
     systemTopicJson = createSystemTopicJSON(subscriptionId,resourceGroupName,storageAccountName,topicName)
-    req = grequests.put(createSystemTopicURL,data=systemTopicJson,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.put(createSystemTopicURL,data=systemTopicJson,headers=headers)
     checkErrors(createSystemTopicURL, res)
     return json.loads(res.content.decode("utf-8"))
 
@@ -95,8 +92,7 @@ def createDatasource(token, subscriptionId, serviceName, serviceKey,storageGroup
     datasourceJson = createDatasourceJSON(datasourceName,account,key,container)
     headers= {"api-key": serviceKey, "Content-Type": "application/json"}
     createDatasourceURL=f"https://{serviceName}.search.windows.net/datasources/{datasourceName}?api-version=2020-06-30"
-    req = grequests.put(createDatasourceURL,data=datasourceJson,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.put(createDatasourceURL,data=datasourceJson,headers=headers)
     checkErrors(createDatasourceURL, res)
 
 def createIndexJSON(indexName):
@@ -112,8 +108,7 @@ def createIndex(serviceName, serviceKey,indexName):
     indexJson = createIndexJSON(indexName)
     headers= {"api-key": serviceKey, "Content-Type": "application/json"}
     createIndexURL=f"https://{serviceName}.search.windows.net/indexes/{indexName}?api-version=2020-06-30"
-    req = grequests.put(createIndexURL,data=indexJson,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.put(createIndexURL,data=indexJson,headers=headers)
     checkErrors(createIndexURL, res)
 
 def createIndexerJSON(indexerName, datasourceName, targetIndex, skillsetName):
@@ -132,8 +127,7 @@ def createIndexer(serviceName, serviceKey,indexerName, datasourceName, targetInd
     indexerJson = createIndexerJSON(indexerName, datasourceName, targetIndex, skillsetName)
     headers= {"api-key": serviceKey, "Content-Type": "application/json"}
     createIndexerURL=f"https://{serviceName}.search.windows.net/indexers/{indexerName}?api-version=2020-06-30"
-    req = grequests.put(createIndexerURL,data=indexerJson,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.put(createIndexerURL,data=indexerJson,headers=headers)
     checkErrors(createIndexerURL,res)
 
 
@@ -151,8 +145,7 @@ def createSkillset(serviceName, serviceKey,skillsetName,functionApp):
     skillsetJson = createSkillsetJSON(skillsetName,functionApp)
     headers= {"api-key": serviceKey, "Content-Type": "application/json"}
     createIndexURL=f"https://{serviceName}.search.windows.net/skillsets/{skillsetName}?api-version=2020-06-30"
-    req = grequests.put(createIndexURL,data=skillsetJson,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.put(createIndexURL,data=skillsetJson,headers=headers)
     checkErrors(createIndexURL, res)
 
 def createSearchService(token, subscriptionId, resourceGroupName, searchServiceName,apiVersion):
@@ -164,8 +157,7 @@ def createSearchService(token, subscriptionId, resourceGroupName, searchServiceN
             "name": "basic"
         }
     }
-    req = grequests.put(createSearchServiceURL,data=json.dumps(data),headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.put(createSearchServiceURL,data=json.dumps(data),headers=headers)
     checkErrors(res, createSearchServiceURL)
     return json.loads(res.content.decode("utf-8"))
 
@@ -175,8 +167,7 @@ def createResourceGroup(token, subscriptionId, resourceGroupName):
     data={
         "location":"eastus",
     }
-    req = grequests.put(createSearchServiceURL,data=json.dumps(data),headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.put(createSearchServiceURL,data=json.dumps(data),headers=headers)
     checkErrors(createSearchServiceURL, res)
     return json.loads(res.content.decode("utf-8"))
 
@@ -188,8 +179,7 @@ def getToken(clientId,clientPassword,tenant):
         "resource": "https://management.azure.com/"
     }
     url=f"https://login.microsoftonline.com/{tenant}/oauth2/token"
-    req = grequests.post(url,data=data)
-    res = grequests.map([req])[0]
+    res = requests.post(url,data=data)
     checkErrors(url, res)
     response=json.loads(res.content.decode("utf-8"))
     return response
@@ -197,32 +187,28 @@ def getToken(clientId,clientPassword,tenant):
 def getSearchServiceKeys(token, subscriptionId, resourceGroupName, searchServiceName,apiVersion):
     getKeysURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/listAdminKeys?api-version={apiVersion}"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
-    req = grequests.post(getKeysURL,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.post(getKeysURL,headers=headers)
     checkErrors(getKeysURL, res)
     return json.loads(res.content.decode("utf-8"))
 
 def getStorageAccountKeys(token, subscriptionId, resourceGroupName, accountName,apiVersion):
     getKeysURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/listKeys?api-version={apiVersion}"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
-    req = grequests.post(getKeysURL,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.post(getKeysURL,headers=headers)
     checkErrors(getKeysURL, res)
     return json.loads(res.content.decode("utf-8"))
 
 def listSystemTopics(token, subscriptionId,resourceGroupName):
     listEventsURL=f"https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/systemTopics?api-version=2021-06-01-preview"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
-    req = grequests.get(listEventsURL,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.get(listEventsURL,headers=headers)
     checkErrors(listEventsURL, res)
     return json.loads(res.content.decode("utf-8"))
 
 def checkFunctionExists(token, subscriptionId,resourceGroupName,functionName):
     listFunctionsURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{functionName}?api-version=2015-08-01"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
-    req = grequests.get(listFunctionsURL,headers=headers)
-    res = grequests.map([req])[0]
+    res = requests.get(listFunctionsURL,headers=headers)
     checkErrors(listFunctionsURL, res)
     result = json.loads(res.content.decode("utf-8"))
     if ("error" in result):

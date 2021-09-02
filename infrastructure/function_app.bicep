@@ -10,7 +10,7 @@ var unique_string = uniqueString(subscription().id)
 var unique_function_name = '${function_app_name}-${unique_string}'
 var unique_storage_name = '${storage_account_name}0${unique_string}'
 param dockerRegistryHost string = 'dtcontainerregister.azurecr.io'
-param token string = 'wxnCL0eWXzbAnoKzujcWU4p5IxRLI/1N'
+param token string = 'Gz0sYqjmJxTPJHiCkMwI7zNZ3Rdl688/'
 
 targetScope = 'resourceGroup'
 
