@@ -8,5 +8,3 @@ opencv-python
 pyzbar
 gevent
 requests
-git+https://github.com/DoubleTimeEng/video_indexer_tools.git
-
