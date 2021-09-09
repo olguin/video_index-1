@@ -18,7 +18,7 @@ def checkErrors(url, res):
                 logging.error(f"Error calling {url} content: {res.content.decode('utf-8')}")
 
     else:
-        logging.error(f"Error calling {url} status code: {res.status_code}")
+        logging.error(f"Error calling {url} status code: {res.status_code} {res.content.decode('utf-8')}")
         
 
 
@@ -27,28 +27,60 @@ def createTemplateEnvironment():
     templateEnv = jinja2.Environment(loader=templateLoader)
     return templateEnv 
 
-def createEventSubscriptionJSON(indexingFunctionIdentifier):
+def createEventSubscriptionJSON(indexingFunctionIdentifier, searchServiceKey, serviceName,indexerName, indexName):
     env = createTemplateEnvironment()
     template = env.get_template('create_event_subscription.json')
     data = {
-        "function_id": indexingFunctionIdentifier
+        "function_id": indexingFunctionIdentifier,
+        "search_service_key": searchServiceKey,
+        "service_name": serviceName,
+        "indexer_name": indexerName,
+        "index_name": indexName
     }
     return template.render(data)
 
-def createEventSubscription(token, subscriptionId, indexingFunctionIdentifier,eventSubscriptionName,storageAccountResourceGroup,storageAccount):
+def createEventSubscription(token, subscriptionId, indexingFunctionIdentifier,eventSubscriptionName,storageAccountResourceGroup,storageAccount, searchServiceKey, serviceName,indexerName, indexName):
     createEventSubscriptionURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{storageAccountResourceGroup}/providers/Microsoft.Storage/storageAccounts/{storageAccount}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}?api-version=2021-06-01-preview"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
-    eventSubscriptionJson = createEventSubscriptionJSON(indexingFunctionIdentifier)
+    eventSubscriptionJson = createEventSubscriptionJSON(indexingFunctionIdentifier, searchServiceKey, serviceName,indexerName, indexName)
     res = requests.put(createEventSubscriptionURL,data=eventSubscriptionJson,headers=headers)
     checkErrors(createEventSubscriptionURL, res)
     return json.loads(res.content.decode("utf-8"))
 
-def getEventSubscription(token, subscriptionId, indexingFunctionIdentifier,eventSubscriptionName,storageAccountResourceGroup,storageAccount):
+def getEventSubscription(token, subscriptionId, eventSubscriptionName,storageAccountResourceGroup,storageAccount):
     getEventSubscriptionURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{storageAccountResourceGroup}/providers/Microsoft.Storage/storageAccounts/{storageAccount}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}?api-version=2021-06-01-preview"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
     res = requests.get(getEventSubscriptionURL,headers=headers)
     checkErrors(getEventSubscriptionURL,res)
     return json.loads(res.content.decode("utf-8"))
+
+def getEventSubscriptionDeliveryAttributes(token, subscriptionId, eventSubscriptionName,storageAccountResourceGroup,storageAccount):
+    getEventSubscriptionURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{storageAccountResourceGroup}/providers/Microsoft.Storage/storageAccounts/{storageAccount}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}/getDeliveryAttributes?api-version=2021-06-01-preview"
+    headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
+    res = requests.post(getEventSubscriptionURL,headers=headers)
+    checkErrors(getEventSubscriptionURL,res)
+    return json.loads(res.content.decode("utf-8"))
+
+def putEventSubscriptionDeliveryAttributes(token, subscriptionId, eventSubscriptionName,storageAccountResourceGroup,storageAccount):
+    data = {
+        "value": [
+            {
+            "name": "header1",
+            "type": "Static",
+            "properties": {
+                "value": "NormalValue",
+                "isSecret": False
+            }
+          }
+        ]
+    }
+    getEventSubscriptionURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{storageAccountResourceGroup}/providers/Microsoft.Storage/storageAccounts/{storageAccount}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}/setDeliveryAttributes?api-version=2021-06-01-preview"
+    headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
+    res = requests.post(getEventSubscriptionURL,data=data,headers=headers)
+    checkErrors(getEventSubscriptionURL,res)
+    #return json.loads(res.content.decode("utf-8"))
+    return res.content.decode("utf-8")
+
 
 
 
@@ -241,6 +273,6 @@ def createCompleteIndex(token, container_to_index_info,serviceName, resourceGrou
     createIndexer(serviceName, searchServiceKey,indexerName, datasourceName,indexName,skillsetName)
 
     indexingFunctionIdentifier=f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Web/sites/{functionApp}/functions/BlobIndexingTrigger"
-    createEventSubscription(token, subscriptionId, indexingFunctionIdentifier,eventSubscriptionName,storageAccountGroup,storageAccount)
+    createEventSubscription(token, subscriptionId, indexingFunctionIdentifier,eventSubscriptionName,storageAccountGroup,storageAccount, searchServiceKey, serviceName,indexerName, indexName)
 
     

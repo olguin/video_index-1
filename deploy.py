@@ -87,9 +87,13 @@ def deployFunctions(functionApp):
 
 def buildInfrastructure(security_info, container_to_index_info, prefix, location):
     subscriptionId = container_to_index_info["subscriptionId"]
+    container=container_to_index_info["container"]
     pwd = os.getcwd()
 
-    build_bicep_command = f"deployment sub create -f {pwd}/infrastructure/main.bicep --subscription {subscriptionId} --parameters prefix={prefix} location={location} --location {location} --query properties.outputs"
+    appId = security_info["appId"]
+    password = security_info["password"]
+    tenant = security_info["tenant"]
+    build_bicep_command = f"deployment sub create -f {pwd}/infrastructure/main.bicep --subscription {subscriptionId} --parameters prefix={prefix} location={location} appid={appId} password={password} tenant={tenant} container={container} --location {location} --query properties.outputs"
     result_dict = run_az_command(build_bicep_command)
 
     searchService = result_dict["searchService"]["value"]

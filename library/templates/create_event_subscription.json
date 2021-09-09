@@ -3,7 +3,45 @@
     "destination": {
       "endpointType": "AzureFunction",
       "properties": {
-        "resourceId": "{{function_id}}"
+        "resourceId": "{{function_id}}",
+        "deliveryAttributeMappings" : [
+               {
+                  "name" : "service-key",
+                  "properties" : {
+                     "isSecret" : true,
+                     "value" : "{{search_service_key}}"
+                  },
+                  "type" : "Static"
+               },
+               {
+                  "name" : "service-name",
+                  "properties" : {
+                     "isSecret" : false,
+                     "value" : "{{service_name}}"
+                  },
+                  "type" : "Static"
+               },
+               {
+                  "name" : "indexer-name",
+                  "properties" : {
+                     "isSecret" : false,
+                     "value" : "{{indexer_name}}"
+                  },
+                  "type" : "Static"
+               },
+               {
+                  "name" : "index-name",
+                  "properties" : {
+                     "isSecret" : false,
+                     "value" : "{{index_name}}"
+                  },
+                  "type" : "Static"
+               }
+
+
+
+
+            ]
       }
     }
   }

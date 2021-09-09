@@ -1,5 +1,9 @@
 param prefix string
 param location string
+param container string
+param appid string
+param password string
+param tenant string
 
 param function_app_name string = '${prefix}-video-index'
 param appservice_plan_name string = '${prefix}-video-index-plan'
@@ -10,7 +14,7 @@ var unique_string = uniqueString(subscription().id)
 var unique_function_name = '${function_app_name}-${unique_string}'
 var unique_storage_name = '${storage_account_name}0${unique_string}'
 param dockerRegistryHost string = 'dtcontainerregister.azurecr.io'
-param token string = 'Gz0sYqjmJxTPJHiCkMwI7zNZ3Rdl688/'
+param tokenDocker string = 'Gz0sYqjmJxTPJHiCkMwI7zNZ3Rdl688/'
 
 targetScope = 'resourceGroup'
 
@@ -92,7 +96,35 @@ resource function_app 'Microsoft.Web/sites@2020-12-01' = {
         }
         {
           name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
-          value: token
+          value: tokenDocker
+        }
+        {
+          name: 'APP_ID'
+          value: appid
+        }
+        {
+          name: 'PASSWORD'
+          value: password
+        }
+        {
+          name: 'TENANT'
+          value: tenant
+        }
+        {
+          name: 'PREFIX'
+          value: prefix
+        }
+        {
+          name: 'GROUP'
+          value: resourceGroup().name
+        }
+        {
+          name: 'SUBSCRIPTION'
+          value: subscription().subscriptionId
+        }
+        {
+          name: 'CONTAINER'
+          value: container
         }
       ]
     }
