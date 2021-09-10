@@ -10,10 +10,10 @@ import hashlib
 import base64
 from library.video_index_creator import *
 
-def getSearchServiceKeys2(token, subscriptionId, resourceGroupName, searchServiceName,apiVersion):
-    getKeysURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/listAdminKeys?api-version={apiVersion}"
+def listSC(token):
+    getKeysURL=f"https://management.azure.com/providers/Microsoft.Web/sourcecontrols?api-version=2019-08-01"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
-    res = requests.post(getKeysURL,headers=headers)
+    res = requests.get(getKeysURL,headers=headers)
     return json.loads(res.content.decode("utf-8"))
 
 security_info = { 
@@ -50,7 +50,7 @@ token = getToken(security_info["appId"], security_info["password"], security_inf
 #result=getEventSubscription(token, subscriptionId, eventSubscriptionName,storageAccountGroup,storageAccount)
 prefix="dtdemo"
 serviceName = f'{prefix}ss'
-result= getSearchServiceKeys2(token,'898225fb-0fa0-4180-82b0-c3c103ade9a4' ,'dtdemorg0uspklrodz4yzi', serviceName, "2020-08-01" )
+result= listSC(token)
 print(json.dumps(result))
 
 

@@ -39,6 +39,16 @@ module searchServiceModule './search_service.bicep' = {
   }
 }
 
+module webAppModule './web_app.bicep' = {
+  name: 'web-app-module'
+  scope: resource_group
+  params: {
+    prefix: prefix
+    location: location
+  }
+}
+
+
 output videoIndexFunctionApp string = functionAppModule.outputs.videoIndexFunctionApp
 output searchService string = searchServiceModule.outputs.searchService
 output resourceGroup string = resource_group.name
