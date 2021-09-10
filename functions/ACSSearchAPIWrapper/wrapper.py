@@ -56,7 +56,7 @@ def addTitles(config, search_result):
             "ocr": "Texto en pantalla",
             "keywords": "Palabras clave",
             "topics": "Temas",
-            "faces": "Caras",
+            "faces": "Rostros",
             "labels": "Etiquetas",
             "brands": "Marcas",
             "header": "Información del video",
@@ -121,6 +121,7 @@ def process_record(record):
         highlighted_subrecord = process_highlights(record, {}, field_path, highlights, matches_count, root_field)
         add_highlighted_subrecord(processed_record, field_path, highlighted_subrecord)
     copy_header(record, processed_record)
+    processed_record["id"] = record["id"]
     add_missing_match_counts(processed_record,matches_count)
     processed_record["match_count"] = matches_count
     processed_record["path"] = record["path"]
@@ -195,7 +196,11 @@ def search_from_json(params, config):
     processed_records = []
     if(params["search"] != "*"):
         for record in search_result["value"]:
-            processed_records.append(process_record(record))
+            highlights = get_highlights(record)
+            if(len(highlights) > 0):
+                processed_records.append(process_record(record))
+            else:
+                processed_records.append(add_missing_match_counts(record,{}))
     else:
         for record in search_result["value"]:
             processed_records.append(add_missing_match_counts(record,{}))

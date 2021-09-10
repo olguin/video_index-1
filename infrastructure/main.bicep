@@ -4,6 +4,7 @@ param container string
 param appid string
 param password string
 param tenant string
+param storage_account string
 
 param resource_group_name string = '${prefix}rg'
 
@@ -27,6 +28,7 @@ module functionAppModule './function_app.bicep' = {
     password: password
     tenant: tenant
     container: container
+    blobs_storage_account: storage_account
   }
 }
 

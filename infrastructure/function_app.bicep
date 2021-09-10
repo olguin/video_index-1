@@ -4,6 +4,7 @@ param container string
 param appid string
 param password string
 param tenant string
+param blobs_storage_account string
 
 param function_app_name string = '${prefix}-video-index'
 param appservice_plan_name string = '${prefix}-video-index-plan'
@@ -125,6 +126,30 @@ resource function_app 'Microsoft.Web/sites@2020-12-01' = {
         {
           name: 'CONTAINER'
           value: container
+        }
+        {
+            'name': 'AUTH_TOKEN_ENDPOINT'
+            'value': 'https://d365-notes.azurewebsites.net/api/Dynamic365AuthToken?code=f3iZ5q8U1Be41VmAvKU4levPD8aDoh4ms5f2aGTsbTUfnn9MppBraQ=='
+        }
+        {
+            'name': 'CONFIG_FILE'
+            'value': 'dt_video_search.json'
+        }
+        {
+            'name': 'STORAGE_ACCOUNT_NAME'
+            'value': blobs_storage_account
+        }
+        {
+            'name': 'STORAGE_CONTAINER'
+            'value': container
+        }
+        {
+            'name': 'USER_NAME'
+            'value': 'spencerl@doubletimeinc.onmicrosoft.com'
+        }
+        {
+            'name': 'USER_PASSWORD'
+            'value': 'DoubleTime1243!'
         }
       ]
     }

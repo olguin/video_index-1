@@ -87,13 +87,14 @@ def deployFunctions(functionApp):
 
 def buildInfrastructure(security_info, container_to_index_info, prefix, location):
     subscriptionId = container_to_index_info["subscriptionId"]
+    storageAccount = container_to_index_info["storageAccount"]
     container=container_to_index_info["container"]
     pwd = os.getcwd()
 
     appId = security_info["appId"]
     password = security_info["password"]
     tenant = security_info["tenant"]
-    build_bicep_command = f"deployment sub create -f {pwd}/infrastructure/main.bicep --subscription {subscriptionId} --parameters prefix={prefix} location={location} appid={appId} password={password} tenant={tenant} container={container} --location {location} --query properties.outputs"
+    build_bicep_command = f"deployment sub create -f {pwd}/infrastructure/main.bicep --subscription {subscriptionId} --parameters prefix={prefix} location={location} appid={appId} password={password} tenant={tenant} storage_account={storageAccount} container={container} --location {location} --query properties.outputs"
     result_dict = run_az_command(build_bicep_command)
 
     searchService = result_dict["searchService"]["value"]
@@ -114,44 +115,46 @@ def buildInfrastructure(security_info, container_to_index_info, prefix, location
     createCompleteIndex(token, container_to_index_info,searchService,resourceGroup,functionApp)
 
 
-#security_info = {
-#    "appId": "26a41b49-d23f-4524-8ae7-7f6222919847",
-#    "password": "Hn~6QCdRy9pyRFqxNUul.SKIqCrEXG.Uq8",
-#    "tenant": "639be87d-9250-4b32-afb6-3ec84932b34b"
-#}
-
-security_info = { 
-  "appId": "26a41b49-d23f-4524-8ae7-7f6222919847",
-  "password": "WFTKC_fNkwq6Nh.Yylg-es2yilXLWziVsw",
-  "tenant": "639be87d-9250-4b32-afb6-3ec84932b34b"
-}
+def getDvConfig():
 
 
-#container_to_index_info = {
-#    "subscriptionId": "5b541c4d-ec9c-4e4e-a6d4-e95ce20e55ef",
-#    "storageAccount": "videosearch",
-#    "storageAccountGroup": "video-search-rg",
-#    "container": "videosearchcontainer",
-#}
+    security_info = { 
+        "appId": "26a41b49-d23f-4524-8ae7-7f6222919847",
+        "password": "WFTKC_fNkwq6Nh.Yylg-es2yilXLWziVsw",
+        "tenant": "639be87d-9250-4b32-afb6-3ec84932b34b"
+    }
 
-#container_to_index_info = {
-#    "subscriptionId": "898225fb-0fa0-4180-82b0-c3c103ade9a4",
-#    "storageAccount": "developmentsc",
-#    "storageAccountGroup": "development-rg",
-#    "container": "development-container",
-#    "storageAccountKey": 'hUOM+L7VbCfqbUsmrBGsDgb/XvQhT9Ok+LSvlr0NPUZ+xzoS9RKwMQlVRmDvobFC6A2VohcZumCp/XjJOXDlYg=='
-#}
+    container_to_index_info = {
+        "subscriptionId": "898225fb-0fa0-4180-82b0-c3c103ade9a4",
+        "storageAccount": "developmentsc",
+        "storageAccountGroup": "development-rg",
+        "container": "development-container",
+        "storageAccountKey": 'hUOM+L7VbCfqbUsmrBGsDgb/XvQhT9Ok+LSvlr0NPUZ+xzoS9RKwMQlVRmDvobFC6A2VohcZumCp/XjJOXDlYg=='
+    }
 
-container_to_index_info = {
-    "subscriptionId": "898225fb-0fa0-4180-82b0-c3c103ade9a4",
-    "storageAccount": "demosc",
-    "storageAccountGroup": "demo-rg",
-    "container": "demo-container",
-    "storageAccountKey": 'ueblVx4vh0U8qMMMPXOK6mq6auwKya0tEFsS1DU6UoRh1HDMMRlG5hyqT2XY1IyC8FiADfRcDbjhk7V2idBEoA=='
-}
+    prefix="dtdv"
+    return prefix, container_to_index_info, security_info
+
+def getDemoConfig():
+    security_info = { 
+        "appId": "26a41b49-d23f-4524-8ae7-7f6222919847",
+        "password": "WFTKC_fNkwq6Nh.Yylg-es2yilXLWziVsw",
+        "tenant": "639be87d-9250-4b32-afb6-3ec84932b34b"
+    }
 
 
-prefix="dtdemo"
+    container_to_index_info = {
+        "subscriptionId": "898225fb-0fa0-4180-82b0-c3c103ade9a4",
+        "storageAccount": "demosc",
+        "storageAccountGroup": "demo-rg",
+        "container": "demo-container",
+        "storageAccountKey": 'ueblVx4vh0U8qMMMPXOK6mq6auwKya0tEFsS1DU6UoRh1HDMMRlG5hyqT2XY1IyC8FiADfRcDbjhk7V2idBEoA=='
+    }
+
+    prefix="dtdemo"
+    return prefix, container_to_index_info, security_info
+
+prefix, container_to_index_info, security_info = getDvConfig()
 location="eastus"
 buildInfrastructure(security_info, container_to_index_info, prefix, location)
 

@@ -39,6 +39,6 @@ class Configuration():
             return (section in services) or self.alwaysIncludedSection(section)
 
     def alwaysIncludedSection(self, section):
-        return section in ["header", "path"]
+        return section in ["header", "path", "id"]
 
 
