@@ -1,7 +1,9 @@
-name: Deploy Python project to Azure Function App dtdv-video-index
+name: Deploy Python project on merge to main branch to Azure Function App dtdv-video-index
 
 on:
-  [push]
+  push:
+    branches:
+      - main
 
 # CONFIGURATION
 # For help, go to https://github.com/Azure/Actions
