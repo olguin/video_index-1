@@ -12,7 +12,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     video_file_path = values[0]["data"]["video_file_path"]
     record_id = values[0]["recordId"]
 
-    videoInfo = processVideo(video_file_path, Configuration(os.path.dirname(video_file_path)))
+    videoInfo = processVideo(video_file_path, Configuration.from_url(os.path.dirname(video_file_path)))
 
     results = {}
     results["values"] = []

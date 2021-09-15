@@ -69,6 +69,6 @@ def main(event: func.EventGridEvent):
     if(action == "DeleteBlob"):
         deleteVideo(url)
     else:
-        processVideo(url,Configuration(os.path.dirname(url)), False)
+        processVideo(url,Configuration.from_url(os.path.dirname(url)), False)
     result = runIndexer()
     logging.info(f"indexer result {result}")

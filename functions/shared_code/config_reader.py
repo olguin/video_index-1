@@ -5,9 +5,14 @@ import logging
 
 class Configuration():
 
-    def __init__(self, container_url):
-        self.configuration = self.read_configuration(container_url)
+    @classmethod
+    def from_url(container_url):
+        return Configuration(Configuration.read_configuration(container_url))
 
+    def __init__(self, configuration):
+        self.configuration = configuration
+
+    @classmethod
     def read_configuration(self, container_url):
         if(container_url == None):
             return None
@@ -25,13 +30,17 @@ class Configuration():
         if(self.configuration == None):
             return "en"
         else:
-            return self.configuration["language"]
+            return self.configuration.get("language", "en")
 
     def filterSectionsByConfigInRecord(self, record):
         sections = [*record]
         for section in sections:
             if(not self.isSectionEnabled(section)):
                     del record[section]
+        counts = [*record["match_count"]]
+        for count in counts:
+            if(not self.isSectionEnabled(count)):
+                    del record["match_count"][count]
 
 
     def isSectionEnabled(self, section):

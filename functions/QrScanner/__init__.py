@@ -27,7 +27,7 @@ def run(req: func.HttpRequest) -> func.HttpResponse:
 
     print(video_file_path)
 
-    config = Configuration(os.path.dirname(video_file_path))
+    config = Configuration.from_url(os.path.dirname(video_file_path))
 
     try:
         detected_barcodes = list()

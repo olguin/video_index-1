@@ -2,7 +2,7 @@ import logging
 import json
 import traceback
 import azure.functions as func
-from ACSSearchAPIWrapper.wrapper import search_from_json as search_from_json 
+from shared_code.acs_wrapper import search_from_json as search_from_json 
 from shared_code.config_reader import Configuration as Configuration 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -11,7 +11,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         parameters = req.get_json()
         logging.info(f'Python HTTP trigger function processed a request parameters{parameters}.')
-        response = json.dumps(search_from_json(parameters, Configuration(parameters.get("container", None))))
+        response = json.dumps(search_from_json(parameters, Configuration.from_url(parameters.get("container", None))))
         logging.info(f'Python HTTP trigger function processed a request response{response}.')
         return func.HttpResponse(response)
     except Exception:

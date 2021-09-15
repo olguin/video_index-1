@@ -1,5 +1,5 @@
 import logging
-import grequests
+import requests
 import json
 
 def get_highlights(record):
@@ -8,11 +8,11 @@ def get_highlights(record):
 def match_with_highligts(metadata_element, highlights):
     for highlight in highlights:
         clean_highlight = highlight.replace("<em>","").replace("</em>","")
-        if(metadata_element == clean_highlight):
-            return highlight
+        if(metadata_element["value"] == clean_highlight):
+            return {"key": metadata_element["key"], "value": highlight}
     return metadata_element
 
-def match_metadata(current_field, metadata, highlights):
+def match_metadata(metadata, highlights):
     matched_metadata=[]
     for metadata_element in metadata:
         matched_metadata.append(match_with_highligts(metadata_element, highlights))
@@ -21,8 +21,6 @@ def match_metadata(current_field, metadata, highlights):
 def find_text_matching_highlights(current_field,recordId,text, highlights):
     if(text == None):
         return None
-    if(current_field == "metadata"):
-            return match_metadata(current_field, text, highlights)
     matching_highlights = []
     for highlight in highlights:
         clean_highlight = highlight.replace("<em>","").replace("</em>","")
@@ -86,6 +84,9 @@ def process_highlights(record,recordId, field_path, highlights, matches_count, r
         if(type(subrecord) == type({})):
             return process_highlights(subrecord, recordId, field_path[1:], highlights, matches_count, root_field)
         else:
+            if(current_field == "metadata"):
+                return match_metadata(subrecord, highlights)
+
             processed_list = []
             for record_elem in subrecord:
                 highlighted_element = process_highlights(record_elem, recordId, field_path[1:], highlights, matches_count, root_field)
@@ -131,7 +132,7 @@ def get_match_count(isStarSearch, values):
     
 def add_missing_match_counts(processed_record,match_count, isStarSearch):
     for field,values in processed_record.items():
-        if(not (field in match_count) and hasattr(values, '__len__') and type(values) == type([])):
+        if(not (field in match_count) and type(values) == type([])):
             match_count[field] = get_match_count(isStarSearch, values)
     processed_record["match_count"] = match_count
     return processed_record
@@ -166,8 +167,7 @@ def get_json(my_file):
 
 def run_search(service,index,key,api_version,params):
     searchIndexURL=f"https://{service}.search.windows.net/indexes/{index}/docs/search?api-version={api_version}"
-    req = grequests.post(searchIndexURL,data=json.dumps(params),headers={"api-key":key, "Content-Type": "application/json"})
-    res = grequests.map([req])[0]
+    res = requests.post(searchIndexURL,data=json.dumps(params),headers={"api-key":key, "Content-Type": "application/json"})
     response=res.content.decode("utf-8")
     try:
         json.loads(response)

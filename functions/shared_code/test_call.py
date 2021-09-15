@@ -1,25 +1,6 @@
 import json
-from wrapper import *
-
-class Configuration():
-
-    def read_configuration(self, container_url):
-            return None
-
-
-    def getLanguage(self):
-        return "en"
-
-    def filterSectionsByConfigInRecord(self, record):
-        None
-
-
-    def isSectionEnabled(self, section):
-        return self.alwaysIncludedSection(section)
-
-    def alwaysIncludedSection(self, section):
-        return section in ["header", "path"]
-
+from acs_wrapper import *
+from config_reader import Configuration as Configuration
 
 
 params = {
@@ -38,6 +19,6 @@ config = {
         }
     }
 #result = test_search(service,index,key,api_version,{"search": search})
-result = search_from_json(params, Configuration())
+result = search_from_json(params, Configuration(config))
 #print(result)
 print(json.dumps(result))
