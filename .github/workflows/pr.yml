@@ -1,0 +1,58 @@
+name: Test Python project on pull_request
+
+on:
+   push:
+       branches-ignore:
+       - main
+
+   pull_request:
+
+# CONFIGURATION
+# For help, go to https://github.com/Azure/Actions
+#
+# 1. Set up the following secrets in your repository:
+#   AZURE_FUNCTIONAPP_PUBLISH_PROFILE
+#
+# 2. Change these variables for your configuration:
+env:
+  AZURE_FUNCTIONAPP_NAME: dtdemo-video-index-uspklrodz4yzi # set this to your application's name
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'   # set this to the path to your web app project, defaults to the repository root
+  PYTHON_VERSION: '3.8'                 # set this to the python version to use (supports 3.6, 3.7, 3.8)
+
+jobs:
+  test_and_build:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        popd
+
+    - name: 'Run Unit tests'
+      shell: bash
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+        python -m pip install -r tests/test_requirements.txt 
+        pytest -v  --cov --cov-report=xml --cov-report=html tests/
+        popd
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: code-coverage
+        path: ./${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/htmlcov
