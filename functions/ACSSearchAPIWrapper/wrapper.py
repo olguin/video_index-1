@@ -18,7 +18,7 @@ def match_metadata(current_field, metadata, highlights):
         matched_metadata.append(match_with_highligts(metadata_element, highlights))
     return matched_metadata
 
-def find_text_matching_highlights(current_field,text, highlights):
+def find_text_matching_highlights(current_field,recordId,text, highlights):
     if(text == None):
         return None
     if(current_field == "metadata"):
@@ -29,7 +29,10 @@ def find_text_matching_highlights(current_field,text, highlights):
         if(clean_highlight in text):
             matching_highlights.append(highlight)
     if(len(matching_highlights) == 0):
-        return None
+        if(recordId != None):
+            return text
+        else:
+            return None
     else:
         if(type(text) == type([])):
             return matching_highlights
@@ -65,26 +68,27 @@ def addTitles(config, search_result):
     }
     search_result["titles"] = titles[config.getLanguage()]
 
-def process_highlights(record, process_record, field_path, highlights, matches_count, root_field):
+def process_highlights(record,recordId, field_path, highlights, matches_count, root_field):
     current_field = field_path[0]
     subrecord = record[current_field]
     if(len(field_path) == 1):
-        matching_highlight = find_text_matching_highlights(current_field,subrecord, highlights)
+        matching_highlight = find_text_matching_highlights(current_field,recordId,subrecord, highlights)
         if(matching_highlight != None):
             record[current_field] = matching_highlight
-            current_count = matches_count.get(root_field,0)
-            if("timestamps" in record):
-                matches_count[root_field] = current_count + len(record["timestamps"])
-            else:
-                matches_count[root_field] = current_count + 1
+            if("<em>" in matching_highlight):
+                current_count = matches_count.get(root_field,0)
+                if("timestamps" in record):
+                    matches_count[root_field] = current_count + len(record["timestamps"])
+                else:
+                    matches_count[root_field] = current_count + 1
             return record
     else:
         if(type(subrecord) == type({})):
-            return process_highlights(subrecord, process_record,field_path[1:], highlights, matches_count, root_field)
+            return process_highlights(subrecord, recordId, field_path[1:], highlights, matches_count, root_field)
         else:
             processed_list = []
             for record_elem in subrecord:
-                highlighted_element = process_highlights(record_elem, process_record,field_path[1:], highlights, matches_count, root_field)
+                highlighted_element = process_highlights(record_elem, recordId, field_path[1:], highlights, matches_count, root_field)
                 if(highlighted_element != None):
                     processed_list.append(highlighted_element)
             return processed_list
@@ -104,25 +108,51 @@ def copy_header(record, processed_record):
         if(not field in processed_record["header"]):
             processed_record["header"][field] = record["header"][field]
     
-def add_missing_match_counts(processed_record,match_count):
+def copy_metadata(record, processed_record):
+    if(not "metadata" in processed_record):
+        processed_record["metadata"] = record["metadata"]
+
+
+def get_match_count(isStarSearch, values):
+    count = 0
+    for value in values:
+        if("value" in value):
+            text = value["value"]
+        else:
+            text = value["text"]
+        if("<em>" in text or isStarSearch):
+            if("timestamps" in value):
+                count = count + len(value["timestamps"])
+            else:
+                count = count + 1
+
+    return count
+
+    
+def add_missing_match_counts(processed_record,match_count, isStarSearch):
     for field,values in processed_record.items():
         if(not (field in match_count) and hasattr(values, '__len__') and type(values) == type([])):
-            match_count[field] = len(values)
+            match_count[field] = get_match_count(isStarSearch, values)
     processed_record["match_count"] = match_count
     return processed_record
 
-def process_record(record):
+def process_record(record, recordId):
     processed_record = {}
     matches_count = {}
     record_highlights = get_highlights(record)
     for field, highlights in record_highlights.items():
         field_path = field.split("/")
         root_field=field_path[0]
-        highlighted_subrecord = process_highlights(record, {}, field_path, highlights, matches_count, root_field)
+        highlighted_subrecord = process_highlights(record,recordId,field_path, highlights, matches_count, root_field)
         add_highlighted_subrecord(processed_record, field_path, highlighted_subrecord)
+    if(recordId != None):
+        for section in record:
+            if(not section in processed_record):
+                processed_record[section] = record[section]
     copy_header(record, processed_record)
+    copy_metadata(record, processed_record)
     processed_record["id"] = record["id"]
-    add_missing_match_counts(processed_record,matches_count)
+    add_missing_match_counts(processed_record,matches_count, False)
     processed_record["match_count"] = matches_count
     processed_record["path"] = record["path"]
 
@@ -134,17 +164,15 @@ def get_json(my_file):
         data = json.load(json_file) 
     return data
 
-def test_file(my_file):
-    search_result = get_json(my_file)
-    record = search_result["value"][0]
-    process_record(record)
-
-
 def run_search(service,index,key,api_version,params):
     searchIndexURL=f"https://{service}.search.windows.net/indexes/{index}/docs/search?api-version={api_version}"
     req = grequests.post(searchIndexURL,data=json.dumps(params),headers={"api-key":key, "Content-Type": "application/json"})
     res = grequests.map([req])[0]
     response=res.content.decode("utf-8")
+    try:
+        json.loads(response)
+    except:
+        logging.error(f"response '{response}' is not valid JSON")
     return response
 
 def get_highlighted_fields():
@@ -179,6 +207,8 @@ def clean_params(params):
    del cleaned_params["api_version"]
    del cleaned_params["index"]
    del cleaned_params["container"]
+   if("id" in cleaned_params):
+    del cleaned_params["id"]
    cleaned_params["highlight"] = get_highlighted_fields()
    cleaned_params["queryType"] = "full"
 
@@ -188,33 +218,30 @@ def filterSectionsByConfig(records, config):
     for record in records:
         config.filterSectionsByConfigInRecord(record)
 
+def appendProcessedRecord(processed_records,record,recordId):
+    if(recordId != None and record["id"] != recordId):
+        return 
+
+    processed_records.append(process_record(record, recordId))
+
+
 def search_from_json(params, config):
+    recordId = params.get("id", None)
     search_result = json.loads(run_search(params["service"],params["index"],params["key"],params["api_version"],clean_params(params)))
-    if("error" in search_result):
+    if("error" in search_result or not ("value" in search_result)):
         return search_result
 
     processed_records = []
     if(params["search"] != "*"):
         for record in search_result["value"]:
-            highlights = get_highlights(record)
-            if(len(highlights) > 0):
-                processed_records.append(process_record(record))
-            else:
-                processed_records.append(add_missing_match_counts(record,{}))
+            appendProcessedRecord(processed_records,record,recordId)
     else:
         for record in search_result["value"]:
-            processed_records.append(add_missing_match_counts(record,{}))
+            processed_records.append(add_missing_match_counts(record,{},True))
 
     filterSectionsByConfig(processed_records, config)
 
     search_result["value"] = processed_records
     addTitles(config, search_result)
     return search_result
-
-def test_search(service,index,key,api_version,params):
-    search_result = json.loads(run_search(service,index,key,api_version,params))
-    print(search_result)
-    record = search_result["value"][0]
-    process_record(record)
-
 

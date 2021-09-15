@@ -71,6 +71,7 @@ def getVideoData(apiUrl,location,accountId, apiKey,accountAccessToken, videoId, 
     finish = False
     while( not finish):
         processingResult = getVideoProcessingStatus(apiUrl,location,accountId, apiKey,accountAccessToken, videoId, videoAccessToken)
+        print(processingResult)
         processingState = processingResult["state"]
         print(processingState)
 
@@ -259,7 +260,7 @@ def indexVideos(forced=False):
 
     q.join()  # blocks until the queue is empty.
 
-def get_video_info(videoUrl):
+def get_video_info(configuration, videoUrl):
     apiUrl , accountId , location , apiKey = getConnectionProperties()
 
     accountAccessToken  = getAccountAccessToken(apiUrl,location,accountId, apiKey)
@@ -276,7 +277,7 @@ def get_video_info(videoUrl):
     with open('/tmp/response.json', 'w', encoding='utf-8') as f:
         json.dump(video_data, f, ensure_ascii=False, indent=4) 
 
-    processingResult = formatForSkill(video_data, videoUrl, location, accountId, videoId)
+    processingResult = formatForSkill(configuration, video_data, videoUrl, location, accountId, videoId)
     with open('/tmp/formated_response.json', 'w', encoding='utf-8') as f:
         json.dump(processingResult, f, ensure_ascii=False, indent=4) 
 

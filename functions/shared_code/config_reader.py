@@ -9,6 +9,9 @@ class Configuration():
         self.configuration = self.read_configuration(container_url)
 
     def read_configuration(self, container_url):
+        if(container_url == None):
+            return None
+
         try:
             config_file = urlopen(f"{container_url}/config.json")
             config_json = config_file.read()
@@ -39,6 +42,6 @@ class Configuration():
             return (section in services) or self.alwaysIncludedSection(section)
 
     def alwaysIncludedSection(self, section):
-        return section in ["header", "path", "id"]
+        return section in ["header", "path", "id", "match_count"]
 
 

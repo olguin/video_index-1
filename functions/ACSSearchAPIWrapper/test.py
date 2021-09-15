@@ -15,7 +15,7 @@ class Configuration():
 
 
     def isSectionEnabled(self, section):
-        return True
+        return self.alwaysIncludedSection(section)
 
     def alwaysIncludedSection(self, section):
         return section in ["header", "path"]
@@ -23,13 +23,13 @@ class Configuration():
 
 
 params = {
-  "key": "D52DA06B07D3A48F345EEC85B21FAA5D",
+  "key": "F106F0B370973EC836AB0BB3CFBF7346",
   "api_version":"2020-06-30",
-  "search": "id: YmFyY29kZS10ZXN0aW5nLm1wNA2",
-  #"search": "barcode",
+  "search": "*",
   "service": "dtdemoss",
-  "index":  "development-container-in",
-  "container": "/home/lorenzo/src/video_index/test_data/no_barcodes.json"
+  "index":  "demo-container-in",
+  #"id": "YmFyY29kZS10ZXN0aW5nLm1wNA2",
+  "container": "https://demosc.blob.core.windows.net/demo-container"
 }
 
 config = {

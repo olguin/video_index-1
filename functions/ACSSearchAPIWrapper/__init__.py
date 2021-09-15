@@ -11,7 +11,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         parameters = req.get_json()
         logging.info(f'Python HTTP trigger function processed a request parameters{parameters}.')
-        response = json.dumps(search_from_json(parameters, Configuration(parameters["container"])))
+        response = json.dumps(search_from_json(parameters, Configuration(parameters.get("container", None))))
         logging.info(f'Python HTTP trigger function processed a request response{response}.')
         return func.HttpResponse(response)
     except Exception:
