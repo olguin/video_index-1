@@ -169,9 +169,10 @@ def getMetadata(processingResult, videoUrl, location, accountId, videoId):
 
 def getConnectionProperties():
     apiUrl = "https://api.videoindexer.ai";
-    accountId = "87ab56c8-906e-4fd4-be73-8cf6949b37c4"; 
     location = "eastus"; 
-    apiKey = "57f13fb725ed48cf9f96ffb4dd4069bf"; 
+    accountId = "a25c2c8a-c8b4-4f3f-a4c1-91e3ae4e36e9"; 
+    apiKey = "07c7c290cc37428a95c9093484ec38b2"; 
+    logging.info(f"Account ID {accountId}")
 
     return apiUrl , accountId , location , apiKey
 
