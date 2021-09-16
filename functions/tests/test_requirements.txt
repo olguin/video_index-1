@@ -2,5 +2,6 @@ coverage
 azure-functions
 pytest
 pytest-cov
+pytest-clarity
 pylint
 responses
