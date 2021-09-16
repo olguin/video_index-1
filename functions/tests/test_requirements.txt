@@ -1,0 +1,6 @@
+coverage
+azure-functions
+pytest
+pytest-cov
+pylint
+responses
