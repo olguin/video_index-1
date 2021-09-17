@@ -20,6 +20,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         logging.info(
             f"NOTE HTTP trigger function processed a request with  note_id: {req_body['PrimaryEntityId']}.")
         crm_organization_URI = os.environ["CRM_BASE_URL"]
+        if crm_organization_URI is None:
+            crm_organization_URI= "https://doubletime.crm.dynamics.com"
+
+        logging.info(f"BASE CRM URL:{crm_organization_URI}")
         crm_auth_token_result = OauthClient.get_oauth_token_response(os.environ["AUTH_TOKEN_ENDPOINT"], crm_organization_URI)
 
         if crm_auth_token_result.status_code != 200:

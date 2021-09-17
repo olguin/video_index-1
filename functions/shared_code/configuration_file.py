@@ -22,6 +22,7 @@ class ConfigurationFile:
         if file_name is not None:
             actual_file = file_name
         file_content_response = ConfigurationFile.get_json_file_from_storage_container(account_name, container, actual_file)
+        logging.info(f"ConfigurationFile - READING CONFIG FILE:{actual_file}")
             
         return cls(file_content_response.json(), actual_file )
 
