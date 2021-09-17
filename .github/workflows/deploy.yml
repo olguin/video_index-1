@@ -1,10 +1,9 @@
 name: Deploy Python project on merge to main branch to Azure Function App dtdv-video-index
 
 on:
-  #push:
-    #branches:
-      #- main
-  [pull_request_target]
+  push:
+    branches:
+      - main
 
 # CONFIGURATION
 # For help, go to https://github.com/Azure/Actions
@@ -14,7 +13,7 @@ on:
 #
 # 2. Change these variables for your configuration:
 env:
-  AZURE_FUNCTIONAPP_NAME: dtdemo-video-index-uspklrodz4yzi # set this to your application's name
+  AZURE_FUNCTIONAPP_NAME: dtdv-video-index-uspklrodz4yzi # set this to your application's name
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'   # set this to the path to your web app project, defaults to the repository root
   PYTHON_VERSION: '3.8'                 # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
