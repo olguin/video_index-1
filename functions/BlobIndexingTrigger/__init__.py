@@ -9,6 +9,7 @@ import queue
 import re
 import logging
 from shared_code.video_indexer_tools import processVideo as processVideo
+from shared_code.video_indexer_tools import videosStillProcessing as videosStillProcessing
 from shared_code.config_reader import Configuration as Configuration 
 from BlobIndexingTrigger.indexing_tools import *
 
@@ -25,5 +26,10 @@ def main(event: func.EventGridEvent):
         deleteVideo(url)
     else:
         processVideo(url,Configuration.from_url(os.path.dirname(url)), False)
-    result = runIndexer()
-    logging.info(f"indexer result {result}")
+
+    if(videosStillProcessing()):
+        logging.info(f"Skipping indexing because some videos are already being processed")
+    else:
+        result = runIndexer()
+        logging.info(f"indexer result {result}")
+

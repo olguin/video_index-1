@@ -155,6 +155,7 @@ def getDemoConfig():
     return prefix, container_to_index_info, security_info
 
 prefix, container_to_index_info, security_info = getDvConfig()
+print(f"deploying to {prefix}")
 location="eastus"
 buildInfrastructure(security_info, container_to_index_info, prefix, location)
 

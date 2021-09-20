@@ -29,11 +29,23 @@ def getAccountAccessToken(apiUrl,location,accountId, apiKey):
     res = requests.get(tokenUrl, headers={"Ocp-Apim-Subscription-Key":apiKey})
     return res.content.decode("utf-8").replace('"','')
 
-def listVideos(apiUrl,location,accountId, apiKey,accountAccessToken):
+def listVideos():
+    apiUrl , accountId , location , apiKey = getConnectionProperties()
+
+    accountAccessToken  = getAccountAccessToken(apiUrl,location,accountId, apiKey)
+
     listVideosUrl=f"https://api.videoindexer.ai/{location}/Accounts/{accountId}/Videos?accessToken={accountAccessToken}"
-    res = requests.get(listVideosUrl)
+    req = grequests.get(listVideosUrl)
+    res = grequests.map([req])[0]
     result = json.loads(res.content.decode("utf-8"))
     return result
+
+def videosStillProcessing():
+    videos = listVideos()
+    for video in videos["results"]:
+        if(video["state"] != "Processed"):
+            return True
+    return False
 
 def removeVideo(apiUrl,location,accountId, apiKey,accountAccessToken, videoId):
     listVideosUrl=f"https://api.videoindexer.ai/{location}/Accounts/{accountId}/Videos/{videoId}?accessToken={accountAccessToken}"

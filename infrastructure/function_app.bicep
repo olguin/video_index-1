@@ -151,6 +151,10 @@ resource function_app 'Microsoft.Web/sites@2020-12-01' = {
             'name': 'USER_PASSWORD'
             'value': 'DoubleTime1243!'
         }
+        {
+            'name': 'CRM_BASE_URL'
+            'value': 'https://dt-fs-test2.crm.dynamics.com'
+        }
       ]
     }
   }
