@@ -1,6 +1,5 @@
 import os
 import json
-import subprocess
 import time
 import logging
 import requests
@@ -66,17 +65,6 @@ def enable_skip_videos(storage_account_name,storage_account_key ):
 
     return r
 
-def run_az_command(command):
-    print(command)
-    command = f"az {command}"
-    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, cwd="functions")
-    output, error = process.communicate()
-    if(error == None):
-        return json.loads(output)
-    else:
-        logging.error(f'Error running az {error} {output}')
-        raise Exception(error)
-
 def deployFunctions(functionApp):
     command = f"func azure functionapp publish {functionApp} --python"
     process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, cwd="functions")
@@ -100,9 +88,11 @@ def buildInfrastructure(security_info, container_to_index_info, prefix, location
     searchService = result_dict["searchService"]["value"]
     functionApp = result_dict["videoIndexFunctionApp"]["value"]
     resourceGroup = result_dict["resourceGroup"]["value"]
+    webApp = result_dict["webAppName"]["value"]
     print(searchService)
     print(functionApp)
     print(resourceGroup)
+    print(webApp)
     token = getToken(security_info["appId"], security_info["password"], security_info["tenant"])["access_token"]
     while not (checkFunctionExists(token, subscriptionId,resourceGroup,functionApp)):
         print("waiting for function app creation")
@@ -112,7 +102,8 @@ def buildInfrastructure(security_info, container_to_index_info, prefix, location
 
     enable_skip_videos(container_to_index_info["storageAccount"], container_to_index_info["storageAccountKey"])
 
-    createCompleteIndex(token, container_to_index_info,searchService,resourceGroup,functionApp)
+    createCompleteIndex(token, container_to_index_info,searchService,resourceGroup,functionApp, webApp)
+
 
 
 def getDvConfig():

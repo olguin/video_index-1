@@ -2,6 +2,7 @@ import json
 import jinja2 
 import requests
 import logging
+import subprocess
 
 
 def checkErrors(url, res):
@@ -248,7 +249,24 @@ def checkFunctionExists(token, subscriptionId,resourceGroupName,functionName):
     else:
         return result["properties"]["state"] == "Running"
 
-def createCompleteIndex(token, container_to_index_info,serviceName, resourceGroup,functionApp):
+def run_az_command(command):
+    print(command)
+    command = f"az {command}"
+    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, cwd="functions")
+    output, error = process.communicate()
+    if(error == None):
+        return json.loads(output)
+    else:
+        logging.error(f'Error running az {error} {output}')
+        raise Exception(error)
+
+def setWebAppIndexKey(subscriptionId, resourceGroup, webApp, searchServiceKey,searchFunctionIdentifier):
+    command=f"webapp config appsettings set --subscription {subscriptionId} -g {resourceGroup} -n {webApp} --settings DT_SEARCH_SERVICE_KEY={searchServiceKey} DT_ACS_WRAPPER_FUNCTION_URL={searchFunctionIdentifier}"
+    run_az_command(command)
+
+
+
+def createCompleteIndex(token, container_to_index_info,serviceName, resourceGroup,functionApp, webApp):
 
     subscriptionId = container_to_index_info["subscriptionId"]
     storageAccountGroup = container_to_index_info["storageAccountGroup"]
@@ -274,5 +292,8 @@ def createCompleteIndex(token, container_to_index_info,serviceName, resourceGrou
 
     indexingFunctionIdentifier=f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Web/sites/{functionApp}/functions/BlobIndexingTrigger"
     createEventSubscription(token, subscriptionId, indexingFunctionIdentifier,eventSubscriptionName,storageAccountGroup,storageAccount, searchServiceKey, serviceName,indexerName, indexName)
+
+    searchFunctionIdentifier=f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Web/sites/{functionApp}/functions/ACSSearchAPIWrapper"
+    setWebAppParameters(subscriptionId, resourceGroup, webApp, searchServiceKey,searchFunctionIdentifier)
 
     

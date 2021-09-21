@@ -47,6 +47,8 @@ module webAppModule './web_app.bicep' = {
   params: {
     prefix: prefix
     location: location
+    container: container
+    blobs_storage_account: storage_account
   }
 }
 
@@ -54,3 +56,4 @@ module webAppModule './web_app.bicep' = {
 output videoIndexFunctionApp string = functionAppModule.outputs.videoIndexFunctionApp
 output searchService string = searchServiceModule.outputs.searchService
 output resourceGroup string = resource_group.name
+output webAppName string = webAppModule.outputs.name
