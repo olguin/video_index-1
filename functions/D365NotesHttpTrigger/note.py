@@ -4,6 +4,9 @@ import dataclasses
 import requests
 import logging
 import base64
+import datetime
+import os
+from shared_code.oauth_client import OauthClient
 
 @dataclass
 class Note:
@@ -33,25 +36,26 @@ class Note:
                    data["createdby"]["fullname"])
 
     @classmethod
-    def find(cls, rest_api_prefix: str, rest_headers: str, note_id: str, error_messages: dict) -> "Note":
+    def find(cls, rest_api_prefix: str, rest_headers: str, note_id: str) -> "Note":
         try:
+            logging.info(f"ENTERING FIND Note:{note_id}")
             params = {'note_id': note_id}
             note_web_api_query = rest_api_prefix + \
                 (Note.NOTE_ENDPOINT.format(**params))
+            logging.info(f"ENTERING FIND QUERY:{note_web_api_query}")    
             note_res = requests.get(note_web_api_query, headers=rest_headers)
-
+            logging.info(f"ENTERING FIND RESPONSE:{note_res.json()}")    
             a_note = Note.from_dict(note_id, note_res.json())
 
             return a_note
         except Exception as ex:
-            logging.error(f"NOTE - find NOTE EXCEPTION:{ex}")
-            error_messages["Note.find"] = str(ex)
-            return None
+            logging.error(f"Error in Note.find: Error:{ex}")          
+            raise
 
     def has_video_attachment(self) -> bool:
         return self.object_type == "msdyn_workorder" and self.is_document and "video" in self.mime_type
 
-    def download_attachment(self, rest_api_prefix:str, rest_headers:str, error_messages:dict)->bytearray:
+    def download_attachment(self, rest_api_prefix:str, rest_headers:str)->bytearray:
         downloaded_file = None
         try:
             params ={'note_id': self.note_id}
@@ -62,11 +66,70 @@ class Note:
             rest_response = requests.get(file_rest_api, headers=file_rest_headers)
             downloaded_file = bytearray(base64.b64decode(rest_response.content))
         except Exception as ex:
-            logging.error(f"Error in download_note_attachment:{ex}")
-            error_messages["note.download_attachment"] = f"  - Http Status code: {rest_response.status_code}, Http Error:{rest_response.text}"
-            return error_messages["download_note_attachment"]
+            logging.error(f"Error in download_note_attachment:{ex}")           
+            raise
 
         return downloaded_file
 
-    def asDict(self) -> "Note":
-        return dataclasses.asDict(self)
+
+
+    def upload_attachment_to_container(self, metadata_tags, note_attachment, account_name, container)->bool:
+        storage_resource = "https://storage.azure.com/"
+        meta_prefix = "x-ms-meta-"
+        storage_auth_token_result = OauthClient.get_oauth_token_response(os.environ["AUTH_TOKEN_ENDPOINT"], storage_resource)
+
+        if storage_auth_token_result.status_code != 200:
+            logging.error(f"Error requesting Oauth token on upload_attachment_to_container - Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}")
+            raise RuntimeError(f"Error requesting Oauth token - Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}")
+
+        date = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+        metadata_header = {}
+        for tag_key in metadata_tags.keys():
+            metadata_header.update({meta_prefix+tag_key: metadata_tags[tag_key]})
+
+        storage_request_headers = {
+            'Authorization': 'Bearer ' + storage_auth_token_result.json()["token"],
+            'Content-Type': 'application/octet-stream',
+            'x-ms-version': '2020-10-02',
+            'x-ms-date': f"{date}",
+            'x-ms-blob-type': 'BlockBlob',
+            'Content-Length': f"{len(note_attachment)}",
+        }
+
+        storage_request_headers.update(metadata_header)
+
+        blob_storage_endpoint = f"https://{account_name}.blob.core.windows.net/{container}/{self.filename}"
+
+        put_blob_result = requests.put(
+            blob_storage_endpoint, data=note_attachment, headers=storage_request_headers)
+
+        logging.info(
+            f"PUT STORAGE HTTP CODE: {put_blob_result.status_code}, RESPONSE:{put_blob_result.text}")
+        if (put_blob_result.status_code != 201):
+            error_message = f"Error saving {self.filename} on {account_name}/{container} - Status code: {put_blob_result.status_code}, Http Error:{put_blob_result.text}"
+            logging.error(error_message)
+            raise RuntimeError(error_message)
+
+        return True
+
+
+    def upload_attachment(self, rest_api_URL:str, oauth_token:str, metadata_tags_values:dict, storage_account_name:str, storage_container:str):
+       
+        if oauth_token is None or oauth_token == "":
+            logging.warning("oauth token none in upload_attachment.")
+
+        file_request_headers = {
+           'Authorization': 'Bearer ' + oauth_token,
+           'Content-Type': 'application/octet-stream',
+        }
+
+        note_video_content = self.download_attachment(rest_api_URL, file_request_headers)
+        if note_video_content is None:
+           raise RuntimeError("Error downloading attachment ")
+
+        return self.upload_attachment_to_container(metadata_tags_values,note_video_content, storage_account_name, storage_container)
+        
+
+
+    def asdict(self) -> dict:
+        return dataclasses.asdict(self)

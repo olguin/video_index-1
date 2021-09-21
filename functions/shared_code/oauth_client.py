@@ -3,7 +3,7 @@ from requests.models import Response
 
 class OauthClient:
     @classmethod
-    def get_oauth_token_response(auth_token_endpoint, resource)-> Response:
+    def get_oauth_token_response(cls, auth_token_endpoint, resource)-> Response:
 
         oauth_data_params = {'resource_id': f"{resource}"}
         auth_token_result = requests.post(

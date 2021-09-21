@@ -35,8 +35,8 @@ def listVideos():
     accountAccessToken  = getAccountAccessToken(apiUrl,location,accountId, apiKey)
 
     listVideosUrl=f"https://api.videoindexer.ai/{location}/Accounts/{accountId}/Videos?accessToken={accountAccessToken}"
-    req = grequests.get(listVideosUrl)
-    res = grequests.map([req])[0]
+    req = requests.get(listVideosUrl)
+    res = requests.map([req])[0]
     result = json.loads(res.content.decode("utf-8"))
     return result
 

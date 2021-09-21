@@ -37,9 +37,8 @@ def test_find_note(fake_note_with_video_attachment):
         rest_headers = {}
         responses.add(responses.GET, api_uri,
                       json=fake_note_with_video_attachment, status=HTTPStatus.OK)
-        error_messages = {}
         a_note = Note.find(base_url, rest_headers,
-                           note_id_value, error_messages)
+                           note_id_value)
         assert a_note == Note.from_dict(
             note_id_value, fake_note_with_video_attachment)
         assert len(responses.calls) == 1    
@@ -75,9 +74,8 @@ def test_download_attachment_gets_bytearray_from_base64_file(fake_note_with_vide
         a_note = Note.from_dict(note_id_value, fake_note_with_video_attachment)
         rest_headers = {}
         responses.add(responses.GET, api_uri, json=fake_attachment, status=HTTPStatus.OK)
-        error_messages = {}
 
-        downloaded_file = a_note.download_attachment(base_url,rest_headers, error_messages)
+        downloaded_file = a_note.download_attachment(base_url,rest_headers)
 
         assert downloaded_file is not None
         assert base64.b64decode(fake_attachment) == downloaded_file

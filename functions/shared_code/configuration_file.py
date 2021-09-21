@@ -12,23 +12,23 @@ import operator
 
 @dataclass
 class ConfigurationFile:
-    content_json:dict
+    json_file_content:dict
     actual_file_name:str
 
     @classmethod 
     def load(cls, account_name:str, container:str, file_name:str) -> "ConfigurationFile":
         DEFAULT_FILE_NAME = "config.json"
-        actual_file = DEFAULT_FILE_NAME
+        name_of_actual_file = DEFAULT_FILE_NAME
         if file_name is not None:
-            actual_file = file_name
-        file_content_response = ConfigurationFile.get_json_file_from_storage_container(account_name, container, actual_file)
-        logging.info(f"ConfigurationFile - READING CONFIG FILE:{actual_file}")
+            name_of_actual_file = file_name
+        file_content_response = ConfigurationFile.get_json_file_from_storage_container(account_name, container, name_of_actual_file)
+        logging.info(f"ConfigurationFile - READING CONFIG FILE:{name_of_actual_file}")
             
-        return cls(file_content_response.json(), actual_file )
+        return cls(file_content_response.json(), name_of_actual_file )
 
 
     @classmethod 
-    def get_json_file_from_storage_container(account_name, container, file_name) -> Response:
+    def get_json_file_from_storage_container(cls, account_name, container, file_name) -> Response:
         storage_resource = "https://storage.azure.com/"
         get_blob_result = None
 
@@ -61,25 +61,25 @@ class ConfigurationFile:
        
     def get_metadata_definition(self)->dict:
         if (self.json_file_content == None):
-           raise RuntimeError("Error config file not loaded")
+           raise RuntimeError("Error config file not loaded.")
 
-        logging.info(f"CONTENT FILE JSON:{self.content_json}")
-        return self.content_json["metadata"]
+        logging.info(f"CONTENT FILE JSON:{self.json_file_content}")
+        return self.json_file_content["metadata"]
 
 
-    def get_metadata_values(self, base_url: str, crm_request_headers: str,  note_dict: dict, error_messages: dict):
+    def get_metadata_values(self, base_url: str, crm_request_headers: str,  note_dict: dict):
        metadata_tags_values = {}
        list_of_metadata_definition = self.get_metadata_definition()
        for metadata_definition in list_of_metadata_definition:
            tags_values = self.get_tags_from_definition(
-           note_dict, metadata_definition, base_url, crm_request_headers, error_messages)
+           note_dict, metadata_definition, base_url, crm_request_headers)
            metadata_tags_values.update(tags_values)
 
        return metadata_tags_values
 
 
 
-    def get_tags_from_definition(self, note_dict: dict, tags_definitions: dict, base_url: str, rest_headers: str,  error_messages: dict):
+    def get_tags_from_definition(self, note_dict: dict, tags_definitions: dict, base_url: str, rest_headers: str):
        tags = {}
        try:
            query_key = tags_definitions["query_key"]
@@ -111,8 +111,8 @@ class ConfigurationFile:
                tags.update(tag_with_value)
 
        except Exception as ex:
-           logging.error(f"GET_TAGS_FOR_OBJECT EXCEPTION:{str(ex)}")
-           error_messages["get_tags_from_definition"] = str(ex)
+           logging.error(f"Error in  get_tags_from_definition:{ex}")
+           raise
        return tags
 
 
