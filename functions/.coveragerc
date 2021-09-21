@@ -1,0 +1,9 @@
+[run]
+omit = 
+        .venv/*
+        tests/*
+        ACSSearchAPIWrapper/__init__.py
+        BlobIndexingTrigger/__init__.py
+        IndexVideosInBlob/__init__.py
+        IndexingVideosState/__init__.py
+        LaunchReindex/__init__.py

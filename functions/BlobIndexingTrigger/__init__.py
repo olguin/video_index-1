@@ -10,8 +10,9 @@ import re
 import logging
 from shared_code.video_indexer_tools import processVideo as processVideo
 from shared_code.video_indexer_tools import videosStillProcessing as videosStillProcessing
+from shared_code.video_indexer_tools import deleteVideo as deleteVideo
+from shared_code.video_indexer_tools import runIndexer as runIndexer
 from shared_code.config_reader import Configuration as Configuration 
-from BlobIndexingTrigger.indexing_tools import *
 
 import azure.functions as func
 

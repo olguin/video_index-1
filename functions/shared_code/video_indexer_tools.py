@@ -9,21 +9,6 @@ import re
 import traceback
 import logging
 
-class Worker(threading.Thread):
-    def __init__(self, q,forced, *args, **kwargs):
-        self.q = q
-        self.forced = forced
-        super().__init__(*args, **kwargs)
-    def run(self):
-        while True:
-            try:
-                url = self.q.get(timeout=60)
-                processVideo(url,self.forced)
-            except queue.Empty:
-                return
-            # do whatever work you have to do on work
-            self.q.task_done()
-
 def getAccountAccessToken(apiUrl,location,accountId, apiKey):
     tokenUrl = f"{apiUrl}/auth/{location}/Accounts/{accountId}/AccessToken?allowEdit=true"
     res = requests.get(tokenUrl, headers={"Ocp-Apim-Subscription-Key":apiKey})
@@ -104,11 +89,6 @@ def videosStillProcessing():
         if(video["state"] != "Processed"):
             return True
     return False
-
-def removeVideo(apiUrl,location,accountId, apiKey,accountAccessToken, videoId):
-    listVideosUrl=f"https://api.videoindexer.ai/{location}/Accounts/{accountId}/Videos/{videoId}?accessToken={accountAccessToken}"
-    res = requests.delete(listVideosUrl)
-    print(res)
 
 def checkVideoIsUploaded(apiUrl,location,accountId, apiKey,accountAccessToken, videoUrl):
     checkUploadedVideoURL = f"{apiUrl}/{location}/Accounts/{accountId}/Videos/GetIdByExternalId?externalId={videoUrl}&accessToken={accountAccessToken}"
@@ -238,23 +218,13 @@ def getMetadata(processingResult, videoUrl, location, accountId, videoId):
     return metadata
 
 def getConnectionProperties():
-    apiUrl = "https://api.videoindexer.ai";
-    location = "eastus"; 
-    accountId = "a25c2c8a-c8b4-4f3f-a4c1-91e3ae4e36e9"; 
-    apiKey = "07c7c290cc37428a95c9093484ec38b2"; 
+    apiUrl = os.getenv("DT_API_URL", "https://api.videoindexer.ai");
+    location = os.getenv("DT_LOCATION", "eastus"); 
+    accountId = os.getenv("DT_ACCOUNT_ID", "a25c2c8a-c8b4-4f3f-a4c1-91e3ae4e36e9"); 
+    apiKey = os.getenv("DT_API_KEY", "07c7c290cc37428a95c9093484ec38b2"); 
     logging.info(f"Account ID {accountId}")
 
     return apiUrl , accountId , location , apiKey
-
-def removeVideos():
-    apiUrl , accountId , location , apiKey = getConnectionProperties()
-
-    accountAccessToken  = getAccountAccessToken(apiUrl,location,accountId, apiKey)
-
-    videos = listVideos(apiUrl,location,accountId, apiKey,accountAccessToken)
-    for video in videos["results"]:
-        videoId = video["id"]
-        removeVideo(apiUrl,location,accountId, apiKey,accountAccessToken, videoId)
 
 def processVideo(videoUrl, configuration , forceUpload=False):
     try:
@@ -366,4 +336,56 @@ def get_video_info(configuration, videoUrl):
     processingResult = formatForSkill(configuration, video_data, videoUrl, location, accountId, videoId)
     with open('/tmp/formated_response.json', 'w', encoding='utf-8') as f:
         json.dump(processingResult, f, ensure_ascii=False, indent=4) 
+
+def findRecord(token,searchServiceKey, url):
+    prefix =  os.getenv("PREFIX")
+    container = os.getenv("CONTAINER")
+
+    serviceName = f'{prefix}ss'
+    indexName=f"{container}-in"
+    findRecordURL =f"https://{serviceName}.search.windows.net/indexes/{indexName}/docs/search?api-version=2020-06-30"
+    data = {
+        "search": f"path: \"{url}\"",
+        "queryType": "full"
+    }
+    headers= {"api-key":searchServiceKey, "Content-Type": "application/json"}
+    res = requests.post(findRecordURL ,headers=headers,data=json.dumps(data))
+    record = json.loads(res.content.decode("utf-8"))
+    return record["value"][0]["id"]
+
+def deleteRecord(token,searchServiceKey, recordId):
+    prefix =  os.getenv("PREFIX")
+    container = os.getenv("CONTAINER")
+
+    serviceName = f'{prefix}ss'
+    indexName=f"{container}-in"
+    deleteRecordURL =f"https://{serviceName}.search.windows.net/indexes/{indexName}/docs/index?api-version=2020-06-30"
+    data = {
+        "value": [
+            {
+            "@search.action": "delete",  
+            "id": recordId
+            }
+        ]
+    }
+    headers= {"api-key":searchServiceKey, "Content-Type": "application/json"}
+    res = requests.post(deleteRecordURL ,headers=headers,data=json.dumps(data))
+    record = json.loads(res.content.decode("utf-8"))
+    return record
+
+
+def deleteVideo(url):
+    try:
+        token = getToken()
+        prefix =  os.getenv("PREFIX")
+        serviceName = f'{prefix}ss'
+        searchServiceKey = getSearchServiceKey(token,serviceName, "2020-08-01" )
+        recordId = findRecord(token,searchServiceKey,url)
+        res = deleteRecord(token,searchServiceKey,recordId)
+        logging.info(f"deleted index data for video {url} {res}")
+    except Exception as e:
+        logging.error(traceback.format_exc())
+        logging.error(e)
+
+
 
