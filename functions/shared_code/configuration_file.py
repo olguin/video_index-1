@@ -59,7 +59,7 @@ class ConfigurationFile:
                 f"get_json_file_from_blog method - get Blob request - " + error_message)
         return get_blob_result
        
-    def get_metadata_definition(self)->dict:
+    def get_metadata_definition(self) -> list:
         if (self.json_file_content == None):
            raise RuntimeError("Error config file not loaded.")
 

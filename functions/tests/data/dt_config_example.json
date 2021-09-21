@@ -1,0 +1,26 @@
+{
+   "index_provider": "Azures",
+   "field_service"  : "D365",
+   "search_parameters": [ {"maximum_video_count_in_search_results": 100 }],
+   "services" : {
+                      "video": [ "metadata", "barcode", "ocr", "keywords", "labels",  "transcript"]
+              },
+
+    "metadata" : [  { "query":  "{base_url}/api/data/v9.1/msdyn_workorders({query_key})?$expand=msdyn_customerasset($select=msdyn_name;$expand=msdyn_product($select=name,productid)),msdyn_serviceaccount($select=name),msdyn_billingaccount($select=name)",
+                       "query_key": "work_order_id",
+                       "record_url": "{base_url}/main.aspx?cmdbar=false&navBar=off&newWindow=true&pagetype=entityrecord&etn={ent_name}&id={ent_id}",
+                       "tags":  [
+                                {"tag": "Work_Order", "field":"msdyn_name"},
+                                {"tag": "Work_Order_URL", "type":"URL", "entity": "msdyn_workorder", "field": "msdyn_workorderid"},
+                                {"tag":"Service_Account", "field":"msdyn_serviceaccount/name"},
+                                {"tag": "Service_Account_URL", "type":"URL", "entity": "account", "field":"msdyn_serviceaccount/accountid" },
+                                {"tag":"Billing_Account", "field":"msdyn_billingaccount/name"},
+                                {"tag":"Billing_Account_URL", "type":"URL", "entity":"account","field":"msdyn_billingaccount/accountid" },
+                                {"tag":"Customer_Asset", "field":"msdyn_customerasset/msdyn_name"},
+                                {"tag":"Customer_Asset_URL", "type":"URL", "entity":"msdyn_customerasset", "field":"msdyn_customerasset/msdyn_customerassetid"},                           
+                                {"tag":"Product", "field":"msdyn_customerasset/msdyn_product/name"},
+                                {"tag":"Product_URL", "type":"URL", "entity": "product", "field":"msdyn_customerasset/msdyn_product/productid"}
+                                ]
+                     }                                 
+                  ]         
+}

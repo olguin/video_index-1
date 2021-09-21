@@ -56,6 +56,11 @@ def copy_note_attachment_to_blob_container(crm_organization_URI:str, note_id:str
             'Prefer': 'odata.include-annotations=OData.Community.Display.V1.FormattedValue'
         }
 
+        file_request_headers = {
+           'Authorization': 'Bearer ' + oauth_token,
+           'Content-Type': 'application/octet-stream',
+        }
+
         # full path to D365 Field Service REST api endpoint
         rest_api_URL: str = crm_organization_URI+'/api/data/v9.1'
 
@@ -69,14 +74,18 @@ def copy_note_attachment_to_blob_container(crm_organization_URI:str, note_id:str
             if note.has_video_attachment():         
                 configuration_file = ConfigurationFile.load(storage_account_name, storage_container, os.environ["CONFIG_FILE"])          
                 metadata_tags_values = configuration_file.get_metadata_values(crm_organization_URI, crm_request_headers,  note.asdict())
-                note.upload_attachment(rest_api_URL, oauth_token, metadata_tags_values, storage_account_name, storage_container)
+                note_video_content = note.download_attachment(rest_api_URL, file_request_headers)
+                if note_video_content is None:
+                   raise RuntimeError("Error downloading attachment.")
+
+                note.upload_attachment_to_container(note_video_content, metadata_tags_values, storage_account_name, storage_container, os.environ["AUTH_TOKEN_ENDPOINT"])
 
        
         return func.HttpResponse(json.dumps(metadata_tags_values, ensure_ascii=False), mimetype="application/json",  status_code=200)
     except Exception as ex:
         error_message = f"Error on Http Note Trigger: {ex}"
         logging.error(error_message)
-        return func.HttpResponse(json.dumps(error_message, ensure_ascii=False), mimetype="application/json",  status_code=401)
+        return func.HttpResponse(json.dumps(error_message, ensure_ascii=False), mimetype="application/json",  status_code=400)
 
 
 

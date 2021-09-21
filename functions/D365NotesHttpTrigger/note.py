@@ -22,6 +22,7 @@ class Note:
 
     NOTE_ENDPOINT: str = "/annotations({note_id})?$select=isdocument,objecttypecode,_objectid_value,mimetype,createdon,filesize,filename&$expand=createdby($select=fullname)"
     ATTACHMENT_ENDPOINT: str = "/annotations({note_id})/documentbody/$value"
+    STORAGE_RESOURCE:str = "https://storage.azure.com/" 
 
     @classmethod
     def from_dict(cls, note_id, data: dict) -> "Note":
@@ -73,30 +74,16 @@ class Note:
 
 
 
-    def upload_attachment_to_container(self, metadata_tags, note_attachment, account_name, container)->bool:
-        storage_resource = "https://storage.azure.com/"
-        meta_prefix = "x-ms-meta-"
-        storage_auth_token_result = OauthClient.get_oauth_token_response(os.environ["AUTH_TOKEN_ENDPOINT"], storage_resource)
+    def upload_attachment_to_container(self, note_attachment, metadata_tags, account_name, container, oauth_endpoint)->bool:
+        storage_auth_token_result = OauthClient.get_oauth_token_response(oauth_endpoint, self.STORAGE_RESOURCE)
 
         if storage_auth_token_result.status_code != 200:
             logging.error(f"Error requesting Oauth token on upload_attachment_to_container - Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}")
             raise RuntimeError(f"Error requesting Oauth token - Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}")
 
-        date = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
-        metadata_header = {}
-        for tag_key in metadata_tags.keys():
-            metadata_header.update({meta_prefix+tag_key: metadata_tags[tag_key]})
-
-        storage_request_headers = {
-            'Authorization': 'Bearer ' + storage_auth_token_result.json()["token"],
-            'Content-Type': 'application/octet-stream',
-            'x-ms-version': '2020-10-02',
-            'x-ms-date': f"{date}",
-            'x-ms-blob-type': 'BlockBlob',
-            'Content-Length': f"{len(note_attachment)}",
-        }
-
-        storage_request_headers.update(metadata_header)
+        storage_auth_token = storage_auth_token_result.json()["token"]
+        datetime_value = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+        storage_request_headers = self.get_storage_request_header(len(note_attachment), metadata_tags, datetime_value, storage_auth_token)
 
         blob_storage_endpoint = f"https://{account_name}.blob.core.windows.net/{container}/{self.filename}"
 
@@ -112,23 +99,25 @@ class Note:
 
         return True
 
+    def get_storage_request_header(self, note_attachment_length:int, metadata_tags:dict, datetime_value:str, storage_auth_token):
+        meta_prefix = "x-ms-meta-"
+        
+        metadata_header = {}
+        for tag_key in metadata_tags.keys():
+            metadata_header.update({meta_prefix+tag_key: metadata_tags[tag_key]})
 
-    def upload_attachment(self, rest_api_URL:str, oauth_token:str, metadata_tags_values:dict, storage_account_name:str, storage_container:str):
-       
-        if oauth_token is None or oauth_token == "":
-            logging.warning("oauth token none in upload_attachment.")
-
-        file_request_headers = {
-           'Authorization': 'Bearer ' + oauth_token,
-           'Content-Type': 'application/octet-stream',
+        storage_request_headers = {
+            'Authorization': 'Bearer ' + storage_auth_token,
+            'Content-Type': 'application/octet-stream',
+            'x-ms-version': '2020-10-02',
+            'x-ms-date': f"{datetime_value}",
+            'x-ms-blob-type': 'BlockBlob',
+            'Content-Length': f"{note_attachment_length}",
         }
 
-        note_video_content = self.download_attachment(rest_api_URL, file_request_headers)
-        if note_video_content is None:
-           raise RuntimeError("Error downloading attachment ")
+        storage_request_headers.update(metadata_header)
+        return storage_request_headers
 
-        return self.upload_attachment_to_container(metadata_tags_values,note_video_content, storage_account_name, storage_container)
-        
 
 
     def asdict(self) -> dict:
