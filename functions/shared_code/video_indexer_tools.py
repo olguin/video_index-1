@@ -35,10 +35,68 @@ def listVideos():
     accountAccessToken  = getAccountAccessToken(apiUrl,location,accountId, apiKey)
 
     listVideosUrl=f"https://api.videoindexer.ai/{location}/Accounts/{accountId}/Videos?accessToken={accountAccessToken}"
-    req = requests.get(listVideosUrl)
-    res = requests.map([req])[0]
+    res = requests.get(listVideosUrl)
     result = json.loads(res.content.decode("utf-8"))
     return result
+
+def getToken():
+    clientId = os.getenv("APP_ID")
+    tenant = os.getenv("TENANT")
+    password = os.getenv("PASSWORD")
+    data = {
+        "grant_type":"client_credentials",
+        "client_id": clientId,
+        "client_secret": password,
+        "resource": "https://management.azure.com/"
+    }
+    url=f"https://login.microsoftonline.com/{tenant}/oauth2/token"
+    res = requests.post(url,data=data)
+    response=json.loads(res.content.decode("utf-8"))
+    if("access_token" in response):
+        return response['access_token']
+    else:
+        raise Exception(response)
+
+def getSearchServiceKey(token, searchServiceName,apiVersion):
+    subscriptionId = os.getenv("SUBSCRIPTION")
+    resourceGroupName =  os.getenv("GROUP")
+
+    getKeysURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/listAdminKeys?api-version={apiVersion}"
+    headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
+    res = requests.post(getKeysURL,headers=headers)
+    searchServiceKeys = json.loads(res.content.decode("utf-8"))
+    if("primaryKey" in searchServiceKeys):
+        return searchServiceKeys["primaryKey"]
+    else:
+        raise Exception(searchServiceKeys)
+
+def runIndexer():
+    token = getToken()
+
+    prefix =  os.getenv("PREFIX")
+    container = os.getenv("CONTAINER")
+
+    serviceName = f'{prefix}ss'
+    searchServiceKey = getSearchServiceKey(token,serviceName, "2020-08-01" )
+    indexerName=f"{container}-irn"
+    runIndexerURL=f"https://{serviceName}.search.windows.net/indexers/{indexerName}/run?api-version=2020-06-30"
+    res = requests.post(runIndexerURL,headers={"api-key":searchServiceKey})
+    return json.loads(res.content.decode("utf-8"))
+
+
+def getIndexerState():
+    token = getToken()
+
+    prefix =  os.getenv("PREFIX")
+    container = os.getenv("CONTAINER")
+
+    serviceName = f'{prefix}ss'
+    searchServiceKey = getSearchServiceKey(token,serviceName, "2020-08-01" )
+    indexerName=f"{container}-irn"
+    getStatusIndexerURL=f"https://{serviceName}.search.windows.net/indexers/{indexerName}/status?api-version=2020-06-30"
+    res = requests.get(getStatusIndexerURL,headers={"api-key":searchServiceKey})
+    return json.loads(res.content.decode("utf-8"))
+
 
 def videosStillProcessing():
     videos = listVideos()
@@ -259,19 +317,34 @@ def formatForSkill(configuration, processingResult, videoUrl, location, accountI
     
     return result
 
-def indexVideos(forced=False):
-    q = queue.Queue()
-    res = requests.get(f"https://dockerazurefuncblob.blob.core.windows.net/doubletime-video-inputs?restype=container&comp=list")
+def isVideo(videoUrl):
+    upperurl = videoUrl.upper()
+    filename, extension = os.path.splitext(upperurl)
+    return extension in [".MP4", ".MOV"]
+
+def scan_all_videos(storageAccount, container):
+    apiUrl , accountId , location , apiKey = getConnectionProperties()
+
+    accountAccessToken  = getAccountAccessToken(apiUrl,location,accountId, apiKey)
+
+    res = requests.get(f"https://{storageAccount}.blob.core.windows.net/{container}?restype=container&comp=list")
     root = ET.fromstring(res.content.decode("utf-8"))
+    alreadyProcessedVideoIds = []
+    newVideoIds = []
     for item in root.findall('.//Url'):
-        url=item.text
-        print(f" queing{url}")
-        q.put_nowait(url)
+        videoUrl=item.text
+        if(isVideo(videoUrl)):
+            videoAlreadyUploaded, videoId = checkVideoIsUploaded(apiUrl,location,accountId, apiKey,accountAccessToken, videoUrl)
+            if (not videoAlreadyUploaded):
+                videoId = uploadVideo(apiUrl,location,accountId, apiKey,accountAccessToken, videoUrl)
+                alreadyProcessedVideoIds.append(videoId)
+            else:
+                newVideoIds.append(videoId)
+    return {
+        "processed_videos": newVideoIds,
+        "already_processed_videos": alreadyProcessedVideoIds
+    }
 
-    for _ in range(12):
-        Worker(q, forced).start()
-
-    q.join()  # blocks until the queue is empty.
 
 def get_video_info(configuration, videoUrl):
     apiUrl , accountId , location , apiKey = getConnectionProperties()
