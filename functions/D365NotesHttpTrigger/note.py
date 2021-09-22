@@ -8,6 +8,7 @@ import datetime
 import os
 from shared_code.oauth_client import OauthClient
 
+
 @dataclass
 class Note:
     note_id: str
@@ -22,7 +23,7 @@ class Note:
 
     NOTE_ENDPOINT: str = "/annotations({note_id})?$select=isdocument,objecttypecode,_objectid_value,mimetype,createdon,filesize,filename&$expand=createdby($select=fullname)"
     ATTACHMENT_ENDPOINT: str = "/annotations({note_id})/documentbody/$value"
-    STORAGE_RESOURCE:str = "https://storage.azure.com/" 
+    STORAGE_RESOURCE: str = "https://storage.azure.com/"
 
     @classmethod
     def from_dict(cls, note_id, data: dict) -> "Note":
@@ -43,43 +44,43 @@ class Note:
             params = {'note_id': note_id}
             note_web_api_query = rest_api_prefix + \
                 (Note.NOTE_ENDPOINT.format(**params))
-            logging.info(f"ENTERING FIND QUERY:{note_web_api_query}")    
+            logging.info(f"ENTERING FIND QUERY:{note_web_api_query}")
             note_res = requests.get(note_web_api_query, headers=rest_headers)
-            logging.info(f"ENTERING FIND RESPONSE:{note_res.json()}")    
+            logging.info(f"ENTERING FIND RESPONSE:{note_res.json()}")
             a_note = Note.from_dict(note_id, note_res.json())
 
             return a_note
         except Exception as ex:
-            logging.error(f"Error in Note.find: Error:{ex}")          
+            logging.error(f"Error in Note.find: Error:{ex}")
             raise
 
     def has_video_attachment(self) -> bool:
         return self.object_type == "msdyn_workorder" and self.is_document and "video" in self.mime_type
 
-    def download_attachment(self, rest_api_prefix:str, rest_headers:str)->bytearray:
+    def download_attachment(self, rest_api_prefix: str, rest_headers: str) -> bytearray:
         downloaded_file = None
         try:
-            params ={'note_id': self.note_id}
+            params = {'note_id': self.note_id}
             file_rest_api = rest_api_prefix + \
-            Note.ATTACHMENT_ENDPOINT.format(**params)
+                Note.ATTACHMENT_ENDPOINT.format(**params)
             file_rest_headers = dict(rest_headers)
 
             rest_response = requests.get(file_rest_api, headers=file_rest_headers)
             downloaded_file = bytearray(base64.b64decode(rest_response.content))
         except Exception as ex:
-            logging.error(f"Error in download_note_attachment:{ex}")           
+            logging.error(f"Error in download_note_attachment:{ex}")
             raise
 
         return downloaded_file
 
-
-
-    def upload_attachment_to_container(self, note_attachment, metadata_tags, account_name, container, oauth_endpoint)->bool:
+    def upload_attachment_to_container(self, note_attachment, metadata_tags, account_name, container, oauth_endpoint) -> bool:
         storage_auth_token_result = OauthClient.get_oauth_token_response(oauth_endpoint, self.STORAGE_RESOURCE)
 
         if storage_auth_token_result.status_code != 200:
-            logging.error(f"Error requesting Oauth token on upload_attachment_to_container - Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}")
-            raise RuntimeError(f"Error requesting Oauth token - Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}")
+            logging.error(
+                f"Error requesting Oauth token on upload_attachment_to_container - Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}")
+            raise RuntimeError(
+                f"Error requesting Oauth token - Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}")
 
         storage_auth_token = storage_auth_token_result.json()["token"]
         datetime_value = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
@@ -99,9 +100,9 @@ class Note:
 
         return True
 
-    def get_storage_request_header(self, note_attachment_length:int, metadata_tags:dict, datetime_value:str, storage_auth_token):
+    def get_storage_request_header(self, note_attachment_length: int, metadata_tags: dict, datetime_value: str, storage_auth_token):
         meta_prefix = "x-ms-meta-"
-        
+
         metadata_header = {}
         for tag_key in metadata_tags.keys():
             metadata_header.update({meta_prefix+tag_key: metadata_tags[tag_key]})
@@ -117,8 +118,6 @@ class Note:
 
         storage_request_headers.update(metadata_header)
         return storage_request_headers
-
-
 
     def asdict(self) -> dict:
         return dataclasses.asdict(self)
