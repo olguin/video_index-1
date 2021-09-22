@@ -33,12 +33,12 @@ def test_find_note(fake_note_with_video_attachment):
 
         note_id_value: str = str(uuid.uuid4())
         base_url = 'https://doubletime.crm.dynamics.com'
-        api_uri = base_url+Note.NOTE_ENDPOINT.format(note_id=note_id_value)
+        api_uri = base_url+'/api/data/v9.1'+Note.NOTE_ENDPOINT.format(note_id=note_id_value)
 
         rest_headers = {}
         responses.add(responses.GET, api_uri,
                       json=fake_note_with_video_attachment, status=HTTPStatus.OK)
-        a_note = Note.find(base_url, rest_headers,
+        a_note = Note.find(base_url+'/api/data/v9.1', rest_headers,
                            note_id_value)
         assert a_note == Note.from_dict(
             note_id_value, fake_note_with_video_attachment)
