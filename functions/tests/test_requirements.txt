@@ -5,3 +5,14 @@ pytest-cov
 pytest-clarity
 pylint
 responses
+numpy
+opencv-python
+pyzbar
+requests
+certifi
+charset-normalizer
+idna
+urllib3
+pep8
+autopep8
+
