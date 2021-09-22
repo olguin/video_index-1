@@ -316,27 +316,6 @@ def scan_all_videos(storageAccount, container):
     }
 
 
-def get_video_info(configuration, videoUrl):
-    apiUrl , accountId , location , apiKey = getConnectionProperties()
-
-    accountAccessToken  = getAccountAccessToken(apiUrl,location,accountId, apiKey)
-
-    videoAlreadyUploaded, videoId = checkVideoIsUploaded(apiUrl,location,accountId, apiKey,accountAccessToken, videoUrl)
-
-    if(not videoAlreadyUploaded):
-        print(f"Video {videoUrl} not uploaded for process yet")
-        return
-
-    videoAccessToken = getVideoToken(apiUrl,location,accountId, apiKey,accountAccessToken, videoId)
-
-    video_data = getVideoData(apiUrl,location,accountId, apiKey,accountAccessToken, videoId, videoAccessToken)
-    with open('/tmp/response.json', 'w', encoding='utf-8') as f:
-        json.dump(video_data, f, ensure_ascii=False, indent=4) 
-
-    processingResult = formatForSkill(configuration, video_data, videoUrl, location, accountId, videoId)
-    with open('/tmp/formated_response.json', 'w', encoding='utf-8') as f:
-        json.dump(processingResult, f, ensure_ascii=False, indent=4) 
-
 def findRecord(token,searchServiceKey, url):
     prefix =  os.getenv("PREFIX")
     container = os.getenv("CONTAINER")
@@ -383,6 +362,7 @@ def deleteVideo(url):
         recordId = findRecord(token,searchServiceKey,url)
         res = deleteRecord(token,searchServiceKey,recordId)
         logging.info(f"deleted index data for video {url} {res}")
+        return res
     except Exception as e:
         logging.error(traceback.format_exc())
         logging.error(e)
