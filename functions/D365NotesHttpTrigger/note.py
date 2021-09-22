@@ -5,7 +5,7 @@ import requests
 import logging
 import base64
 import datetime
-import os
+
 from shared_code.oauth_client import OauthClient
 
 
@@ -105,7 +105,7 @@ class Note:
 
         metadata_header = {}
         for tag_key in metadata_tags.keys():
-            metadata_header.update({meta_prefix+tag_key: metadata_tags[tag_key]})
+            metadata_header.update({meta_prefix + tag_key: metadata_tags[tag_key]})
 
         storage_request_headers = {
             'Authorization': 'Bearer ' + storage_auth_token,

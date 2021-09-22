@@ -27,7 +27,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if crm_auth_token_result.status_code != 200:
             error_message = f"Note Http Trigger - OAUTH ERROR - Http Status code: {crm_auth_token_result.status_code}, Http Error:{crm_auth_token_result.text}"
             logging.info(error_message)
-            return func.HttpResponse(json.dumps(error_message, ensure_ascii=False), mimetype="application/json",  status_code=crm_auth_token_result.status_code)
+            return func.HttpResponse(json.dumps(error_message, ensure_ascii=False), mimetype="application/json", status_code=crm_auth_token_result.status_code)
 
         oauth_token = crm_auth_token_result.json()["token"]
 
@@ -35,4 +35,4 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as ex:
         logging.error(
             f"Error in Note Http Trigger init method - EXCEPTION:{ex}")
-        func.HttpResponse(json.dumps(f"Error in Note Http Trigger:{ex}", ensure_ascii=False), mimetype="application/json", status_code = 401)
+        func.HttpResponse(json.dumps(f"Error in Note Http Trigger:{ex}", ensure_ascii=False), mimetype="application/json", status_code=400)
