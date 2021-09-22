@@ -3793,3 +3793,35 @@ def testProcessVideo():
 
     result  = processVideo(videoUrl, configuration)
 
+@responses.activate
+def testProcessVideoNoResult():
+    setConnectionProperties("https://dummyapi.com", "eastus", "123456", "ABCDEFGHI")
+    accountAccessToken = "dummy_token"
+    addAccountAccessResponse(accountAccessToken)
+    apiUrl , accountId , location , apiKey = getConnectionProperties()
+    videoUrl = "https://dummy/video.mp4"
+    addCheckUploadVideoResponse(apiUrl , accountId , location , apiKey, accountAccessToken , videoUrl, 404, "{}")
+    videoId = "videoId1234"
+    addUploadVideoResponse(apiUrl , accountId , location , apiKey, accountAccessToken, videoUrl,  json.dumps({"id": videoId}))
+    addVideoTokenResponse(apiUrl , accountId , location , apiKey,accountAccessToken,videoId,"dummyToken")
+    videoResponse = None
+    addVideoStatusResponse(apiUrl , accountId , location , apiKey, accountAccessToken, videoId, "dummyToken", json.dumps(videoResponse))
+    addHeaderResponse(videoUrl)
+    configuration = ConfigurationFile(
+        {
+        "index_provider": "Azure",
+        "field_service"  : "D365",
+        "search_parameters": [ {"maximum_video_count_in_search_results": 100 }],
+        "services" : {
+                            "video": ["barcodes" , "brands" , "faces" , "header" , "keywords" , "labels" , "metadata" , "ocr" , "topics" , "transcripts" ]
+                    },
+
+            "metadata" : {},
+            "language": "en"
+        },
+        "file_name"
+    )
+
+    result  = processVideo(videoUrl, configuration)
+
+

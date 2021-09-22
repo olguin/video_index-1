@@ -160,11 +160,6 @@ def process_record(record, recordId):
 
     return processed_record
 
-def get_json(my_file):
-    with open(my_file, newline='') as json_file:
-        data = json.load(json_file) 
-    return data
-
 def run_search(service,index,key,api_version,params):
     searchIndexURL=f"https://{service}.search.windows.net/indexes/{index}/docs/search?api-version={api_version}"
     res = requests.post(searchIndexURL,data=json.dumps(params),headers={"api-key":key, "Content-Type": "application/json"})

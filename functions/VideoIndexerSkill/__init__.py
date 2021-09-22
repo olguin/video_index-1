@@ -2,7 +2,7 @@ import azure.functions as func
 from shared_code.video_indexer_tools import processVideo as processVideo
 import json
 import logging
-from shared_code.config_reader import ConfigurationFile as Configuration 
+from shared_code.configuration_file import ConfigurationFile as Configuration 
 import os
 
 

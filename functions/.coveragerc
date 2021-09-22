@@ -7,5 +7,7 @@ omit =
         IndexVideosInBlob/__init__.py,	
         IndexingVideosState/__init__.py,
         LaunchReindex/__init__.py,
-	Dynamic365AuthToken/__init__.py,
-	D365NotesHttpTrigger/__init__.py
+        VideoIndexerSkill/__init__.py
+        QrScanner/__init__.py
+        Dynamic365AuthToken/__init__.py,
+        D365NotesHttpTrigger/__init__.py
