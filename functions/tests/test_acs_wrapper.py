@@ -1,7 +1,7 @@
 import responses
 import json
 from shared_code.acs_wrapper import *
-from shared_code.config_reader import Configuration as Configuration
+from shared_code.configuration_file import ConfigurationFile as ConfigurationFile
 import pytest
 
 def get_index_url(params):
@@ -73,7 +73,7 @@ def testMetadataNotMatchingSearch():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config, "file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(1, len(records))
@@ -147,7 +147,7 @@ def testMetadataMatchingSearch():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config,"file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(1, len(records))
@@ -223,7 +223,7 @@ def testHeaderMatchingSearch():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config,"file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(1, len(records))
@@ -322,7 +322,7 @@ def testSectionMatchingSearch():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config,"file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(1, len(records))
@@ -426,7 +426,7 @@ def testSectionMatchingSearchWithTimestamps():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config,"file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(1, len(records))
@@ -530,7 +530,7 @@ def testSectionMatchingSearchDisabledSection():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config, "file_name"))
     assert ("value" in result)
     records = result["value"]
 
@@ -624,14 +624,14 @@ def testSearchMatchingById():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config, "file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(2, len(records))
 
     add_search_response(params, json.loads(index_response))
     params["id"] = "12345"
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config, "file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(1, len(records))
@@ -719,7 +719,7 @@ def testSectionMatchingSearchById():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config, "file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(1, len(records))
@@ -816,7 +816,7 @@ def testSectionMatchingSearchBywildCard():
     """
 
     add_search_response(params, json.loads(index_response))
-    result = search_from_json(params, Configuration(config))
+    result = search_from_json(params, ConfigurationFile(config, "file_name"))
     assert ("value" in result)
     records = result["value"]
     assertEqual(1, len(records))

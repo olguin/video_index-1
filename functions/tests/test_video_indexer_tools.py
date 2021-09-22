@@ -1,7 +1,7 @@
 import responses
 import json
 from shared_code.video_indexer_tools import *
-from shared_code.config_reader import Configuration as Configuration
+from shared_code.configuration_file import ConfigurationFile as ConfigurationFile
 import pytest
 
 def setConnectionProperties(apiUrl, location, accountId, apiKey):
@@ -15,9 +15,9 @@ def addSearchServiceKeyResponse(subscriptionId, groupId, searchService,apiVersio
     os.environ["GROUP"] = groupId
 
     getKeysURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{groupId}/providers/Microsoft.Search/searchServices/{searchService}/listAdminKeys?api-version={apiVersion}"
-    keysResponse = {
-        "primaryKey": key
-    }
+    keysResponse = {}
+    if(key != None):
+        keysResponse["primaryKey"] = key
     responses.add(**{
         'method'         : responses.POST,
         'url'            : getKeysURL,
@@ -34,8 +34,10 @@ def addGetTokenResponse(appID , tenant , password , token):
     os.environ["PASSWORD"] = password
     url=f"https://login.microsoftonline.com/{tenant}/oauth2/token"
     tokenResponse = {
-        "access_token": token
     }
+    if(token != None):
+        tokenResponse["access_token"] = token
+
     responses.add(**{
         'method'         : responses.POST,
         'url'            : url,
@@ -161,6 +163,21 @@ def testUploadVideo():
     assert "id12345678"  == uploadVideo(apiUrl,location,accountId, apiKey,accountAccessToken, videoUrl)
 
 @responses.activate
+def testUploadVideoError():
+    setConnectionProperties("https://dummyapi.com", "eastus", "123456", "ABCDEFGHI")
+    apiUrl , accountId , location , apiKey = getConnectionProperties()
+    accountAccessToken = "123456"
+    videoUrl = "https://dummy/video.mp4"
+
+    addUploadVideoResponse(apiUrl , accountId , location , apiKey, accountAccessToken, videoUrl,  '{"error": "error message"}')
+    try: 
+        uploadVideo(apiUrl,location,accountId, apiKey,accountAccessToken, videoUrl)
+    except:
+        #expected
+        return
+    pytest.fail("should have thrown exception")
+
+@responses.activate
 def testGetVideoToken():
     setConnectionProperties("https://dummyapi.com", "eastus", "123456", "ABCDEFGHI")
     apiUrl , accountId , location , apiKey = getConnectionProperties()
@@ -243,6 +260,19 @@ def testGetToken():
     assert token == getToken()
 
 @responses.activate
+def testGetTokenWithError():
+    token = None
+    try: 
+        addGetTokenResponse("1234", "5678", "ABCDE", token)
+        getToken()
+    except:
+        #expected
+        return
+    pytest.fail("should have thrown exception")
+        
+
+
+@responses.activate
 def testSearchServiceKey():
     key = "dummy_key"
     searchService = "searchservice"
@@ -250,6 +280,21 @@ def testSearchServiceKey():
     addSearchServiceKeyResponse("subscriptionid", "groupid", searchService,apiVersion, key)
 
     assert key == getSearchServiceKey("dummy_token", searchService, apiVersion)
+
+@responses.activate
+def testSearchServiceKeyError():
+    key = None
+    searchService = "searchservice"
+    apiVersion = "2020-08-01"
+    addSearchServiceKeyResponse("subscriptionid", "groupid", searchService,apiVersion, key)
+
+    try: 
+        getSearchServiceKey("dummy_token", searchService, apiVersion)
+    except:
+        #expected
+        return
+    pytest.fail("should have thrown exception")
+
 
 @responses.activate
 def testRunIndexer():
@@ -281,6 +326,40 @@ def testRunIndexer():
 
 
     assert {} == runIndexer()
+
+@responses.activate
+def testScanAllVideos():
+    setConnectionProperties("https://dummyapi.com", "eastus", "123456", "ABCDEFGHI")
+    apiUrl , accountId , location , apiKey = getConnectionProperties()
+    accountAccessToken = "123456"
+    addAccountAccessResponse(accountAccessToken)
+    videoUrl1 = "https://dummy/video1.mp4"
+    videoUrl2 = "https://dummy/video2.mp4"
+
+    addCheckUploadVideoResponse(apiUrl , accountId , location , apiKey, accountAccessToken , videoUrl1, 404, None)
+    addCheckUploadVideoResponse(apiUrl , accountId , location , apiKey, accountAccessToken , videoUrl2, 200, "{}")
+    addUploadVideoResponse(apiUrl , accountId , location , apiKey, accountAccessToken, videoUrl1,  '{"id": "id12345678"}')
+
+    storageAccount = "storage_account"
+    container = "container"
+    listVideosInContainerURL = f"https://{storageAccount}.blob.core.windows.net/{container}?restype=container&comp=list"
+    videoListXML=f"""
+        <Document>
+            <Url>{videoUrl1}</Url>
+            <Url>{videoUrl2}</Url>
+        </Document>
+    """
+    responses.add(**{
+        'method'         : responses.GET,
+        'url'            : listVideosInContainerURL,
+        'body'           : videoListXML,
+        'status'         : 200,
+        'content_type'   : 'application/json',
+        'adding_headers' : {'Last-Modified': '1999-01-02'}
+        })
+
+
+    scan_all_videos(storageAccount, container)
 
 @responses.activate
 def testGetIndexerState():
@@ -3697,7 +3776,7 @@ def testProcessVideo():
     }
     addVideoStatusResponse(apiUrl , accountId , location , apiKey, accountAccessToken, videoId, "dummyToken", json.dumps(videoResponse))
     addHeaderResponse(videoUrl)
-    configuration = Configuration(
+    configuration = ConfigurationFile(
         {
         "index_provider": "Azure",
         "field_service"  : "D365",
@@ -3708,7 +3787,8 @@ def testProcessVideo():
 
             "metadata" : {},
             "language": "en"
-        }
+        },
+        "file_name"
     )
 
     result  = processVideo(videoUrl, configuration)

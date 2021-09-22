@@ -4,7 +4,7 @@ import azure.functions as func
 import cv2
 import json
 import traceback
-from shared_code.config_reader import Configuration as Configuration 
+from shared_code.config_reader import ConfigurationFile as Configuration 
 import os
 
 from datetime import datetime
@@ -27,7 +27,7 @@ def run(req: func.HttpRequest) -> func.HttpResponse:
 
     print(video_file_path)
 
-    config = Configuration.from_url(os.path.dirname(video_file_path))
+    config = ConfigurationFile.get_json_file_from_url(os.path.dirname(video_file_path))
 
     try:
         detected_barcodes = list()

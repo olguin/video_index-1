@@ -28,6 +28,11 @@ class ConfigurationFile:
 
     @classmethod
     def get_json_file_from_storage_container(cls, account_name, container, file_name) -> Response:
+        blob_storage_path = f"https://{account_name}.blob.core.windows.net/{container}"
+        return ConfigurationFile.get_json_file_from_url(blob_storage_path,file_name)
+
+    @classmethod
+    def get_json_file_from_url(cls, blob_storage_path, file_name="config.json") -> Response:
         storage_resource = "https://storage.azure.com/"
         get_blob_result = None
 
@@ -49,7 +54,7 @@ class ConfigurationFile:
                 'x-ms-blob-type': 'BlockBlob'
             }
 
-            blob_storage_endpoint = f"https://{account_name}.blob.core.windows.net/{container}/{file_name}"
+            blob_storage_endpoint = f"{blob_storage_path}/{file_name}"
             get_blob_result = requests.get(
                 blob_storage_endpoint, headers=storage_request_headers)
             if get_blob_result.status_code != 200:
@@ -126,3 +131,34 @@ class ConfigurationFile:
 
     def get_from_dict(self, data_dict, field_path):
         return reduce(operator.getitem, field_path, data_dict)
+
+    def getLanguage(self):
+        if(self.json_file_content == None):
+            return "en"
+        else:
+            return self.json_file_content.get("language", "en")
+
+    def filterSectionsByConfigInRecord(self, record):
+        sections = [*record]
+        for section in sections:
+            if(not self.isSectionEnabled(section)):
+                    del record[section]
+        if("match_count" in record):
+            counts = [*record["match_count"]]
+            for count in counts:
+                if(not self.isSectionEnabled(count)):
+                        del record["match_count"][count]
+
+
+    def isSectionEnabled(self, section):
+        if(self.json_file_content == None):
+            return True
+        else:
+            services = self.json_file_content["services"]["video"]
+            return (section in services) or self.alwaysIncludedSection(section)
+
+    def alwaysIncludedSection(self, section):
+        return section in ["header", "path", "id", "match_count"]
+
+
+

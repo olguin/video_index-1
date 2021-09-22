@@ -12,7 +12,7 @@ from shared_code.video_indexer_tools import processVideo as processVideo
 from shared_code.video_indexer_tools import videosStillProcessing as videosStillProcessing
 from shared_code.video_indexer_tools import deleteVideo as deleteVideo
 from shared_code.video_indexer_tools import runIndexer as runIndexer
-from shared_code.config_reader import Configuration as Configuration 
+from shared_code.config_reader import ConfigurationFile as Configuration 
 
 import azure.functions as func
 
@@ -26,7 +26,7 @@ def main(event: func.EventGridEvent):
     if(action == "DeleteBlob"):
         deleteVideo(url)
     else:
-        processVideo(url,Configuration.from_url(os.path.dirname(url)), False)
+        processVideo(url,ConfigurationFile.get_json_file_from_url(os.path.dirname(url)), False)
 
     if(videosStillProcessing()):
         logging.info(f"Skipping indexing because some videos are already being processed")

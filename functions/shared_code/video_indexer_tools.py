@@ -297,7 +297,8 @@ def scan_all_videos(storageAccount, container):
 
     accountAccessToken  = getAccountAccessToken(apiUrl,location,accountId, apiKey)
 
-    res = requests.get(f"https://{storageAccount}.blob.core.windows.net/{container}?restype=container&comp=list")
+    listVideosInContainerURL = f"https://{storageAccount}.blob.core.windows.net/{container}?restype=container&comp=list"
+    res = requests.get(listVideosInContainerURL)
     root = ET.fromstring(res.content.decode("utf-8"))
     alreadyProcessedVideoIds = []
     newVideoIds = []
@@ -354,18 +355,14 @@ def deleteRecord(token,searchServiceKey, recordId):
 
 
 def deleteVideo(url):
-    try:
-        token = getToken()
-        prefix =  os.getenv("PREFIX")
-        serviceName = f'{prefix}ss'
-        searchServiceKey = getSearchServiceKey(token,serviceName, "2020-08-01" )
-        recordId = findRecord(token,searchServiceKey,url)
-        res = deleteRecord(token,searchServiceKey,recordId)
-        logging.info(f"deleted index data for video {url} {res}")
-        return res
-    except Exception as e:
-        logging.error(traceback.format_exc())
-        logging.error(e)
+    token = getToken()
+    prefix =  os.getenv("PREFIX")
+    serviceName = f'{prefix}ss'
+    searchServiceKey = getSearchServiceKey(token,serviceName, "2020-08-01" )
+    recordId = findRecord(token,searchServiceKey,url)
+    res = deleteRecord(token,searchServiceKey,recordId)
+    logging.info(f"deleted index data for video {url} {res}")
+    return res
 
 
 

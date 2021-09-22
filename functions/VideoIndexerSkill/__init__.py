@@ -2,7 +2,7 @@ import azure.functions as func
 from shared_code.video_indexer_tools import processVideo as processVideo
 import json
 import logging
-from shared_code.config_reader import Configuration as Configuration 
+from shared_code.config_reader import ConfigurationFile as Configuration 
 import os
 
 
@@ -12,7 +12,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     video_file_path = values[0]["data"]["video_file_path"]
     record_id = values[0]["recordId"]
 
-    videoInfo = processVideo(video_file_path, Configuration.from_url(os.path.dirname(video_file_path)))
+    videoInfo = processVideo(video_file_path, ConfigurationFile.get_json_file_from_url(os.path.dirname(video_file_path)))
 
     results = {}
     results["values"] = []
