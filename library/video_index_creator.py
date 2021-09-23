@@ -260,7 +260,7 @@ def run_az_command(command):
         logging.error(f'Error running az {error} {output}')
         raise Exception(error)
 
-def setWebAppIndexKey(subscriptionId, resourceGroup, webApp, searchServiceKey,searchFunctionIdentifier):
+def setWebAppParameters(subscriptionId, resourceGroup, webApp, searchServiceKey,searchFunctionIdentifier):
     command=f"webapp config appsettings set --subscription {subscriptionId} -g {resourceGroup} -n {webApp} --settings DT_SEARCH_SERVICE_KEY={searchServiceKey} DT_ACS_WRAPPER_FUNCTION_URL={searchFunctionIdentifier}"
     run_az_command(command)
 

@@ -5,6 +5,8 @@ param appid string
 param password string
 param tenant string
 param blobs_storage_account string
+param video_index_account string
+param video_index_key string
 
 param function_app_name string = '${prefix}-video-index'
 param appservice_plan_name string = '${prefix}-video-index-plan'
@@ -104,6 +106,14 @@ resource function_app 'Microsoft.Web/sites@2020-12-01' = {
           value: appid
         }
         {
+          name: 'DT_LOCATION'
+          value: location
+        }
+        {
+          name: 'DT_API_URL'
+          value: 'https://api.videoindexer.ai'
+        }
+        {
           name: 'PASSWORD'
           value: password
         }
@@ -154,6 +164,14 @@ resource function_app 'Microsoft.Web/sites@2020-12-01' = {
         {
             'name': 'CRM_BASE_URL'
             'value': 'https://dt-fs-test2.crm.dynamics.com'
+        }
+        {
+            'name': 'DT_ACCOUNT_ID'
+            'value': video_index_account
+        }
+        {
+            'name': 'DT_API_KEY'
+            'value': video_index_key
         }
       ]
     }

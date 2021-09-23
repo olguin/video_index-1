@@ -73,7 +73,7 @@ def deployFunctions(functionApp):
         logging.error(f'Error deploying functions {error} {output}')
         raise Exception(error)
 
-def buildInfrastructure(security_info, container_to_index_info, prefix, location):
+def buildInfrastructure(security_info, container_to_index_info, video_indexer_info, prefix, location):
     subscriptionId = container_to_index_info["subscriptionId"]
     storageAccount = container_to_index_info["storageAccount"]
     container=container_to_index_info["container"]
@@ -82,7 +82,11 @@ def buildInfrastructure(security_info, container_to_index_info, prefix, location
     appId = security_info["appId"]
     password = security_info["password"]
     tenant = security_info["tenant"]
-    build_bicep_command = f"deployment sub create -f {pwd}/infrastructure/main.bicep --subscription {subscriptionId} --parameters prefix={prefix} location={location} appid={appId} password={password} tenant={tenant} storage_account={storageAccount} container={container} --location {location} --query properties.outputs"
+
+    video_index_account = video_indexer_info["account_id"]
+    video_index_key = video_indexer_info["api_key"]
+
+    build_bicep_command = f"deployment sub create -f {pwd}/infrastructure/main.bicep --subscription {subscriptionId} --parameters prefix={prefix} location={location} appid={appId} password={password} tenant={tenant} storage_account={storageAccount} container={container} video_index_account={video_index_account} video_index_key={video_index_key} --location {location} --query properties.outputs"
     result_dict = run_az_command(build_bicep_command)
 
     searchService = result_dict["searchService"]["value"]
@@ -123,8 +127,14 @@ def getDvConfig():
         "storageAccountKey": 'hUOM+L7VbCfqbUsmrBGsDgb/XvQhT9Ok+LSvlr0NPUZ+xzoS9RKwMQlVRmDvobFC6A2VohcZumCp/XjJOXDlYg=='
     }
 
+    video_indexer_info = {
+        "account_id": "e98c6faa-a17d-4eac-9abb-a95afbc86d41",
+        "api_key": "07c7c290cc37428a95c9093484ec38b2"
+    }
+
+
     prefix="dtdv"
-    return prefix, container_to_index_info, security_info
+    return prefix, container_to_index_info, security_info, video_indexer_info
 
 def getDemoConfig():
     security_info = { 
@@ -142,11 +152,18 @@ def getDemoConfig():
         "storageAccountKey": 'ueblVx4vh0U8qMMMPXOK6mq6auwKya0tEFsS1DU6UoRh1HDMMRlG5hyqT2XY1IyC8FiADfRcDbjhk7V2idBEoA=='
     }
 
-    prefix="dtdemo"
-    return prefix, container_to_index_info, security_info
 
-prefix, container_to_index_info, security_info = getDvConfig()
+    video_indexer_info = {
+        "account_id": "a25c2c8a-c8b4-4f3f-a4c1-91e3ae4e36e9",
+        "api_key": "07c7c290cc37428a95c9093484ec38b2"
+    }
+
+
+    prefix="dtdemo"
+    return prefix, container_to_index_info, security_info, video_indexer_info
+
+prefix, container_to_index_info, security_info, video_indexer_info = getDvConfig()
 print(f"deploying to {prefix}")
 location="eastus"
-buildInfrastructure(security_info, container_to_index_info, prefix, location)
+buildInfrastructure(security_info, container_to_index_info, video_indexer_info, prefix, location)
 
