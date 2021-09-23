@@ -1,6 +1,5 @@
 import os
 from D365NotesHttpTrigger.notes_trigger_function import NotesTriggerFunction
-import datetime
 from D365NotesHttpTrigger.note import Note
 import pytest
 import uuid
@@ -8,7 +7,6 @@ import responses
 
 import json
 from http import HTTPStatus
-import base64
 
 
 @pytest.fixture()
@@ -60,8 +58,8 @@ def test_copy_note_attachment_to_blob_container_returns_status_ok_on_success(fak
     # mock to return fake conf file
     responses.add(responses.GET, conf_file_storage_endpoint, json=fake_config_file, status=HTTPStatus.OK)
 
-    attachment_api_uri = base_url+'/api/data/v9.1'+Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
-    crm_api_uri = base_url+'/api/data/v9.1'+Note.NOTE_ENDPOINT.format(note_id=note_id_value)
+    attachment_api_uri = base_url + '/api/data/v9.1' + Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
+    crm_api_uri = base_url + '/api/data/v9.1' + Note.NOTE_ENDPOINT.format(note_id=note_id_value)
 
     # Mock for Note.find
     responses.add(responses.GET, crm_api_uri, json=fake_note_with_video_attachment, status=HTTPStatus.OK)
@@ -77,7 +75,7 @@ def test_copy_note_attachment_to_blob_container_returns_status_ok_on_success(fak
     # mock for saving attachment to blob storage container
     responses.add(responses.PUT, blob_storage_endpoint, json={}, status=HTTPStatus.CREATED)
 
-    metadata_url = "{base_url}/api/data/v9.1/msdyn_workorders({query_key})?$expand=msdyn_customerasset($select=msdyn_name;$expand=msdyn_product($select=name,productid)),msdyn_serviceaccount($select=name),msdyn_billingaccount($select=name)"
+    metadata_url = "{base_url}/api/data/v9.1/msdyn_workorders({query_key})?$expand=msdyn_customerasset($select=msdyn_name;$expand=msdyn_product($select=name,productid)),msdyn_serviceaccount($select=name),msdyn_billingaccount($select=name)" # noqa 
 
     work_order_id = "be343d0c-60c9-43e6-a1ba-9ea03a0a34ea"
     format_params = {"base_url": base_url, "query_key": work_order_id}
@@ -113,8 +111,8 @@ def test_copy_note_attachment_to_blob_container_returns_invalid_request_on_failu
     # mock to return fake conf file
     responses.add(responses.GET, conf_file_storage_endpoint, json=fake_config_file, status=HTTPStatus.OK)
 
-    attachment_api_uri = base_url+'/api/data/v9.1'+Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
-    crm_api_uri = base_url+'/api/data/v9.1'+Note.NOTE_ENDPOINT.format(note_id=note_id_value)
+    attachment_api_uri = base_url + '/api/data/v9.1' + Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
+    crm_api_uri = base_url + '/api/data/v9.1' + Note.NOTE_ENDPOINT.format(note_id=note_id_value)
 
     # Mock for Note.find
     responses.add(responses.GET, crm_api_uri, json=fake_note_with_video_attachment, status=HTTPStatus.OK)
@@ -128,7 +126,7 @@ def test_copy_note_attachment_to_blob_container_returns_invalid_request_on_failu
     # mock for oauth get_token
     responses.add(responses.POST, oauth_url, json={"token": oauth_token}, status=HTTPStatus.OK)
 
-    metadata_url = "{base_url}/api/data/v9.1/msdyn_workorders({query_key})?$expand=msdyn_customerasset($select=msdyn_name;$expand=msdyn_product($select=name,productid)),msdyn_serviceaccount($select=name),msdyn_billingaccount($select=name)"
+    metadata_url = "{base_url}/api/data/v9.1/msdyn_workorders({query_key})?$expand=msdyn_customerasset($select=msdyn_name;$expand=msdyn_product($select=name,productid)),msdyn_serviceaccount($select=name),msdyn_billingaccount($select=name)"  # noqa 
     work_order_id = "be343d0c-60c9-43e6-a1ba-9ea03a0a34ea"
     format_params = {"base_url": base_url, "query_key": work_order_id}
     object_rest_api_query = metadata_url.format(**format_params)

@@ -19,7 +19,6 @@ class NotesTriggerFunction:
                 'OData-Version': '4.0',
                 'Accept': 'application/json',
                 'Content-Type': 'application/json; charset=utf-8',
-                'Prefer': 'odata.maxpagesize=500',
                 'Prefer': 'odata.include-annotations=OData.Community.Display.V1.FormattedValue'
             }
 
@@ -29,7 +28,7 @@ class NotesTriggerFunction:
             }
 
             # full path to D365 Field Service REST api endpoint
-            rest_api_URL: str = crm_organization_URI+'/api/data/v9.1'
+            rest_api_URL: str = crm_organization_URI + '/api/data/v9.1'
 
             metadata_tags_values = {}
 
@@ -40,7 +39,7 @@ class NotesTriggerFunction:
             if note is not None:
                 if note.has_video_attachment():
                     configuration_file = ConfigurationFile.load(storage_account_name, storage_container, os.environ["CONFIG_FILE"])
-                    metadata_tags_values = configuration_file.get_metadata_values(crm_organization_URI, crm_request_headers,  note.asdict())
+                    metadata_tags_values = configuration_file.get_metadata_values(crm_organization_URI, crm_request_headers, note.asdict())
                     note_video_content = note.download_attachment(rest_api_URL, file_request_headers)
                     if note_video_content is None:
                         raise RuntimeError("Error downloading attachment.")
@@ -48,8 +47,8 @@ class NotesTriggerFunction:
                 note.upload_attachment_to_container(note_video_content, metadata_tags_values, storage_account_name,
                                                     storage_container, os.environ["AUTH_TOKEN_ENDPOINT"])
 
-            return func.HttpResponse(json.dumps(metadata_tags_values, ensure_ascii=False), mimetype="application/json",  status_code=200)
+            return func.HttpResponse(json.dumps(metadata_tags_values, ensure_ascii=False), mimetype="application/json", status_code=200)
         except Exception as ex:
             error_message = f"Error on Http Note Trigger: {ex}"
             logging.error(error_message)
-            return func.HttpResponse(json.dumps(error_message, ensure_ascii=False), mimetype="application/json",  status_code=400)
+            return func.HttpResponse(json.dumps(error_message, ensure_ascii=False), mimetype="application/json", status_code=400)

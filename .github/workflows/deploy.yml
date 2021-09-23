@@ -35,6 +35,8 @@ jobs:
       shell: bash
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        sudo apt-get install zbar-tools -y
+        sudo apt-get install libzbar0 -y
         python -m pip install --upgrade pip
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
         python -m pip install -r tests/test_requirements.txt
