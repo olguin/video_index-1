@@ -25,9 +25,9 @@ def listVideos():
     return result
 
 def getToken():
-    clientId = os.getenv("APP_ID")
-    tenant = os.getenv("TENANT")
-    password = os.getenv("PASSWORD")
+    clientId = os.getenv("DT_APP_ID")
+    tenant = os.getenv("DT_TENANT")
+    password = os.getenv("DT_PASSWORD")
     data = {
         "grant_type":"client_credentials",
         "client_id": clientId,
@@ -43,8 +43,8 @@ def getToken():
         raise Exception(response)
 
 def getSearchServiceKey(token, searchServiceName,apiVersion):
-    subscriptionId = os.getenv("SUBSCRIPTION")
-    resourceGroupName =  os.getenv("GROUP")
+    subscriptionId = os.getenv("DT_SUBSCRIPTION")
+    resourceGroupName =  os.getenv("DT_SEARCH_SERVICE_GROUP")
 
     getKeysURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/listAdminKeys?api-version={apiVersion}"
     headers= {"Authorization":f"Bearer {token}", "Content-Type": "application/json"}
@@ -58,8 +58,8 @@ def getSearchServiceKey(token, searchServiceName,apiVersion):
 def runIndexer():
     token = getToken()
 
-    prefix =  os.getenv("PREFIX")
-    container = os.getenv("CONTAINER")
+    prefix =  os.getenv("DT_PREFIX")
+    container = os.getenv("DT_INDEXED_CONTAINER")
 
     serviceName = f'{prefix}ss'
     searchServiceKey = getSearchServiceKey(token,serviceName, "2020-08-01" )
@@ -72,8 +72,8 @@ def runIndexer():
 def getIndexerState():
     token = getToken()
 
-    prefix =  os.getenv("PREFIX")
-    container = os.getenv("CONTAINER")
+    prefix =  os.getenv("DT_PREFIX")
+    container = os.getenv("DT_INDEXED_CONTAINER")
 
     serviceName = f'{prefix}ss'
     searchServiceKey = getSearchServiceKey(token,serviceName, "2020-08-01" )
@@ -218,10 +218,10 @@ def getMetadata(processingResult, videoUrl, location, accountId, videoId):
     return metadata
 
 def getConnectionProperties():
-    apiUrl = os.getenv("DT_API_URL", "https://api.videoindexer.ai");
+    apiUrl = os.getenv("DT_VIDEO_SCAN_API_URL", "https://api.videoindexer.ai");
     location = os.getenv("DT_LOCATION", "eastus"); 
-    accountId = os.getenv("DT_ACCOUNT_ID", "a25c2c8a-c8b4-4f3f-a4c1-91e3ae4e36e9"); 
-    apiKey = os.getenv("DT_API_KEY", "07c7c290cc37428a95c9093484ec38b2"); 
+    accountId = os.getenv("DT_VIDEO_SCAN_ACCOUNT_ID", "a25c2c8a-c8b4-4f3f-a4c1-91e3ae4e36e9"); 
+    apiKey = os.getenv("DT_VIDEO_SCAN_API_KEY", "07c7c290cc37428a95c9093484ec38b2"); 
     logging.info(f"Account ID {accountId}")
 
     return apiUrl , accountId , location , apiKey
@@ -318,8 +318,8 @@ def scan_all_videos(storageAccount, container):
 
 
 def findRecord(token,searchServiceKey, url):
-    prefix =  os.getenv("PREFIX")
-    container = os.getenv("CONTAINER")
+    prefix =  os.getenv("DT_PREFIX")
+    container = os.getenv("DT_INDEXED_CONTAINER")
 
     serviceName = f'{prefix}ss'
     indexName=f"{container}-in"
@@ -334,8 +334,8 @@ def findRecord(token,searchServiceKey, url):
     return record["value"][0]["id"]
 
 def deleteRecord(token,searchServiceKey, recordId):
-    prefix =  os.getenv("PREFIX")
-    container = os.getenv("CONTAINER")
+    prefix =  os.getenv("DT_PREFIX")
+    container = os.getenv("DT_INDEXED_CONTAINER")
 
     serviceName = f'{prefix}ss'
     indexName=f"{container}-in"
@@ -356,7 +356,7 @@ def deleteRecord(token,searchServiceKey, recordId):
 
 def deleteVideo(url):
     token = getToken()
-    prefix =  os.getenv("PREFIX")
+    prefix =  os.getenv("DT_PREFIX")
     serviceName = f'{prefix}ss'
     searchServiceKey = getSearchServiceKey(token,serviceName, "2020-08-01" )
     recordId = findRecord(token,searchServiceKey,url)

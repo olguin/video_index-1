@@ -45,13 +45,13 @@ def test_copy_note_attachment_to_blob_container_returns_status_ok_on_success(fak
     oauth_url = 'https://dtdv-video-index-uspklrodz4yzi.azurewebsites.net/api/Dynamic365AuthToken?code=V5UYqIu=='
     oauth_token = "AAABBBCCCDDDEEE"
     config_file_name = "dt_config_example.json"
-    os.environ["CONFIG_FILE"] = config_file_name
+    os.environ["DT_CONFIG_FILE"] = config_file_name
 
-    os.environ["AUTH_TOKEN_ENDPOINT"] = oauth_url
+    os.environ["DT_AUTH_TOKEN_ENDPOINT"] = oauth_url
     account_name = "storage_account_a"
     container = "container_a"
-    os.environ["STORAGE_ACCOUNT_NAME"] = account_name
-    os.environ["STORAGE_CONTAINER"] = container
+    os.environ["DT_INDEXED_STORAGE_ACCOUNT_NAME"] = account_name
+    os.environ["DT_INDEXED_CONTAINER"] = container
 
     conf_file_storage_endpoint = f"https://{account_name}.blob.core.windows.net/{container}/{config_file_name}"
 
@@ -98,13 +98,13 @@ def test_copy_note_attachment_to_blob_container_returns_invalid_request_on_failu
     oauth_url = 'https://dtdv-video-index-uspklrodz4yzi.azurewebsites.net/api/Dynamic365AuthToken?code=V5UYqIu=='
     oauth_token = "AAABBBCCCDDDEEE"
     config_file_name = "dt_config_example.json"
-    os.environ["CONFIG_FILE"] = config_file_name
+    os.environ["DT_CONFIG_FILE"] = config_file_name
 
-    os.environ["AUTH_TOKEN_ENDPOINT"] = oauth_url
+    os.environ["DT_AUTH_TOKEN_ENDPOINT"] = oauth_url
     account_name = "storage_account_a"
     container = "container_a"
-    os.environ["STORAGE_ACCOUNT_NAME"] = account_name
-    os.environ["STORAGE_CONTAINER"] = container
+    os.environ["DT_INDEXED_STORAGE_ACCOUNT_NAME"] = account_name
+    os.environ["DT_INDEXED_CONTAINER"] = container
 
     conf_file_storage_endpoint = f"https://{account_name}.blob.core.windows.net/{container}/{config_file_name}"
 

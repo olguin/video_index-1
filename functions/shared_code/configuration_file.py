@@ -36,7 +36,7 @@ class ConfigurationFile:
         storage_resource = "https://storage.azure.com/"
         get_blob_result = None
 
-        storage_auth_token_result = OauthClient.get_oauth_token_response(os.environ["AUTH_TOKEN_ENDPOINT"], storage_resource)
+        storage_auth_token_result = OauthClient.get_oauth_token_response(os.environ["DT_AUTH_TOKEN_ENDPOINT"], storage_resource)
 
         if storage_auth_token_result.status_code != 200:
             error_message = f"Http Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}"

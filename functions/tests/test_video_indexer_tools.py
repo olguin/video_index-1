@@ -5,14 +5,14 @@ from shared_code.configuration_file import ConfigurationFile as ConfigurationFil
 import pytest
 
 def setConnectionProperties(apiUrl, location, accountId, apiKey):
-    os.environ["DT_API_URL"] = apiUrl
+    os.environ["DT_VIDEO_SCAN_API_URL"] = apiUrl
     os.environ["DT_LOCATION"] = location
-    os.environ["DT_ACCOUNT_ID"] = accountId
-    os.environ["DT_API_KEY"] = apiKey
+    os.environ["DT_VIDEO_SCAN_ACCOUNT_ID"] = accountId
+    os.environ["DT_VIDEO_SCAN_API_KEY"] = apiKey
 
 def addSearchServiceKeyResponse(subscriptionId, groupId, searchService,apiVersion, key):
-    os.environ["SUBSCRIPTION"] = subscriptionId
-    os.environ["GROUP"] = groupId
+    os.environ["DT_SUBSCRIPTION"] = subscriptionId
+    os.environ["DT_SEARCH_SERVICE_GROUP"] = groupId
 
     getKeysURL=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{groupId}/providers/Microsoft.Search/searchServices/{searchService}/listAdminKeys?api-version={apiVersion}"
     keysResponse = {}
@@ -29,9 +29,9 @@ def addSearchServiceKeyResponse(subscriptionId, groupId, searchService,apiVersio
 
 
 def addGetTokenResponse(appID , tenant , password , token):
-    os.environ["APP_ID"] = appID
-    os.environ["TENANT"] = tenant
-    os.environ["PASSWORD"] = password
+    os.environ["DT_APP_ID"] = appID
+    os.environ["DT_TENANT"] = tenant
+    os.environ["DT_PASSWORD"] = password
     url=f"https://login.microsoftonline.com/{tenant}/oauth2/token"
     tokenResponse = {
     }
@@ -301,9 +301,9 @@ def testRunIndexer():
     key = "dummy_key"
     apiVersion = "2020-08-01"
     prefix =  "my_prefix"
-    os.environ["PREFIX"] = prefix
+    os.environ["DT_PREFIX"] = prefix
     container =  "my_container"
-    os.environ["CONTAINER"] = container
+    os.environ["DT_INDEXED_CONTAINER"] = container
 
     serviceName = f'{prefix}ss'
     indexerName=f"{container}-irn"
@@ -366,9 +366,9 @@ def testGetIndexerState():
     key = "dummy_key"
     apiVersion = "2020-08-01"
     prefix =  "my_prefix"
-    os.environ["PREFIX"] = prefix
+    os.environ["DT_PREFIX"] = prefix
     container =  "my_container"
-    os.environ["CONTAINER"] = container
+    os.environ["DT_INDEXED_CONTAINER"] = container
 
     serviceName = f'{prefix}ss'
     indexerName=f"{container}-irn"
@@ -397,9 +397,9 @@ def testFindRecord():
     key = "dummy_key"
     apiVersion = "2020-08-01"
     prefix =  "my_prefix"
-    os.environ["PREFIX"] = prefix
+    os.environ["DT_PREFIX"] = prefix
     container =  "my_container"
-    os.environ["CONTAINER"] = container
+    os.environ["DT_INDEXED_CONTAINER"] = container
 
     serviceName = f'{prefix}ss'
     indexName=f"{container}-in"
@@ -436,9 +436,9 @@ def testDeleteRecord():
     key = "dummy_key"
     apiVersion = "2020-08-01"
     prefix =  "my_prefix"
-    os.environ["PREFIX"] = prefix
+    os.environ["DT_PREFIX"] = prefix
     container =  "my_container"
-    os.environ["CONTAINER"] = container
+    os.environ["DT_INDEXED_CONTAINER"] = container
 
     serviceName = f'{prefix}ss'
     indexName=f"{container}-in"
@@ -467,9 +467,9 @@ def testDeleteVideo():
     key = "dummy_key"
     apiVersion = "2020-08-01"
     prefix =  "my_prefix"
-    os.environ["PREFIX"] = prefix
+    os.environ["DT_PREFIX"] = prefix
     container =  "my_container"
-    os.environ["CONTAINER"] = container
+    os.environ["DT_INDEXED_CONTAINER"] = container
 
     serviceName = f'{prefix}ss'
     indexName=f"{container}-in"

@@ -9,8 +9,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     try:
-        storage_account = os.getenv("STORAGE_ACCOUNT_NAME")
-        container = os.getenv("STORAGE_CONTAINER")
+        storage_account = os.getenv("DT_INDEXED_STORAGE_ACCOUNT_NAME")
+        container = os.getenv("DT_INDEXED_CONTAINER")
         response = json.dumps(scan_all_videos(storage_account, container))
         return func.HttpResponse(response)
     except Exception:

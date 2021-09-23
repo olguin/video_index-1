@@ -11,8 +11,8 @@ class NotesTriggerFunction:
     @classmethod
     def copy_note_attachment_to_blob_container(cls, crm_organization_URI: str, note_id: str, oauth_token: str) -> func.HttpResponse:
         try:
-            storage_account_name = os.environ["STORAGE_ACCOUNT_NAME"]
-            storage_container = os.environ["STORAGE_CONTAINER"]
+            storage_account_name = os.environ["DT_INDEXED_STORAGE_ACCOUNT_NAME"]
+            storage_container = os.environ["DT_INDEXED_CONTAINER"]
             crm_request_headers = {
                 'Authorization': 'Bearer ' + oauth_token,
                 'OData-MaxVersion': '4.0',
@@ -38,14 +38,14 @@ class NotesTriggerFunction:
 
             if note is not None:
                 if note.has_video_attachment():
-                    configuration_file = ConfigurationFile.load(storage_account_name, storage_container, os.environ["CONFIG_FILE"])
+                    configuration_file = ConfigurationFile.load(storage_account_name, storage_container, os.environ["DT_CONFIG_FILE"])
                     metadata_tags_values = configuration_file.get_metadata_values(crm_organization_URI, crm_request_headers, note.asdict())
                     note_video_content = note.download_attachment(rest_api_URL, file_request_headers)
                     if note_video_content is None:
                         raise RuntimeError("Error downloading attachment.")
 
                 note.upload_attachment_to_container(note_video_content, metadata_tags_values, storage_account_name,
-                                                    storage_container, os.environ["AUTH_TOKEN_ENDPOINT"])
+                                                    storage_container, os.environ["DT_AUTH_TOKEN_ENDPOINT"])
 
             return func.HttpResponse(json.dumps(metadata_tags_values, ensure_ascii=False), mimetype="application/json", status_code=200)
         except Exception as ex:

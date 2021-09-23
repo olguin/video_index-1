@@ -11,8 +11,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     resource_id = req.get_json()["resource_id"]
     logging.info(f"NOTE OAUTH HTTP function resource parameter: {resource_id}.")
     client_id = '87704f6a-f56f-4992-95f5-5aa57e17388e' # application client id
-    username = os.environ["USER_NAME"]
-    user_password = os.environ["USER_PASSWORD"]
+    username = os.environ["DT_CRM_USER_NAME"]
+    user_password = os.environ["DT_CRM_USER_PASSWORD"]
     token_endpoint = 'https://login.microsoftonline.com/639be87d-9250-4b32-afb6-3ec84932b34b/oauth2/token' # oauth token endpoint
     # build the authorization token request
     token_body = {

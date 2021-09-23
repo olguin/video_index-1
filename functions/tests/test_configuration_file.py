@@ -26,7 +26,7 @@ def fake_work_order():
 def test_load_config_file(fake_config_file):
     """Test load config file """
     oauth_url = 'https://dtdv-video-index-uspklrodz4yzi.azurewebsites.net/api/Dynamic365AuthToken?code=V5UYqIu=='
-    os.environ["AUTH_TOKEN_ENDPOINT"] = oauth_url
+    os.environ["DT_AUTH_TOKEN_ENDPOINT"] = oauth_url
 
     oauth_token = "AAABBBCCCDDDEEE"
 

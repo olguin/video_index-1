@@ -102,7 +102,7 @@ resource function_app 'Microsoft.Web/sites@2020-12-01' = {
           value: tokenDocker
         }
         {
-          name: 'APP_ID'
+          name: 'DT_APP_ID'
           value: appid
         }
         {
@@ -110,67 +110,63 @@ resource function_app 'Microsoft.Web/sites@2020-12-01' = {
           value: location
         }
         {
-          name: 'DT_API_URL'
+          name: 'DT_VIDEO_SCAN_API_URL'
           value: 'https://api.videoindexer.ai'
         }
         {
-          name: 'PASSWORD'
+          name: 'DT_PASSWORD'
           value: password
         }
         {
-          name: 'TENANT'
+          name: 'DT_TENANT'
           value: tenant
         }
         {
-          name: 'PREFIX'
+          name: 'DT_PREFIX'
           value: prefix
         }
         {
-          name: 'GROUP'
+          name: 'DT_SEARCH_SERVICE_GROUP'
           value: resourceGroup().name
         }
         {
-          name: 'SUBSCRIPTION'
+          name: 'DT_SUBSCRIPTION'
           value: subscription().subscriptionId
         }
         {
-          name: 'CONTAINER'
-          value: container
-        }
-        {
-            'name': 'AUTH_TOKEN_ENDPOINT'
+            'name': 'DT_AUTH_TOKEN_ENDPOINT'
             'value': 'https://d365-notes.azurewebsites.net/api/Dynamic365AuthToken?code=f3iZ5q8U1Be41VmAvKU4levPD8aDoh4ms5f2aGTsbTUfnn9MppBraQ=='
         }
         {
-            'name': 'CONFIG_FILE'
+            'name': 'DT_CONFIG_FILE'
             'value': 'dt_video_search.json'
         }
         {
-            'name': 'STORAGE_ACCOUNT_NAME'
+            'name': 'DT_INDEXED_STORAGE_ACCOUNT_NAME'
             'value': blobs_storage_account
         }
         {
-            'name': 'STORAGE_CONTAINER'
+            'name': 'DT_INDEXED_CONTAINER'
             'value': container
         }
         {
-            'name': 'USER_NAME'
+            'name': 'DT_CRM_USER_NAME'
             'value': 'spencerl@doubletimeinc.onmicrosoft.com'
         }
         {
-            'name': 'USER_PASSWORD'
+            'name': 'DT_CRM_USER_PASSWORD'
             'value': 'DoubleTime1243!'
         }
         {
-            'name': 'CRM_BASE_URL'
+            'name': 'DT_CRM_BASE_URL'
             'value': 'https://dt-fs-test2.crm.dynamics.com'
         }
         {
-            'name': 'DT_ACCOUNT_ID'
+            'name': 'DT_VIDEO_SCAN_ACCOUNT_ID'
             'value': video_index_account
         }
         {
-            'name': 'DT_API_KEY'
+            'name': 'DT_VIDEO_SCAN_API_KEY'
             'value': video_index_key
         }
       ]

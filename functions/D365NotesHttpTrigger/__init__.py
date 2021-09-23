@@ -17,12 +17,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
 
-        crm_organization_URI = os.environ["CRM_BASE_URL"]
+        crm_organization_URI = os.environ["DT_CRM_BASE_URL"]
         if crm_organization_URI is None or crm_organization_URI == "":
             crm_organization_URI = "https://doubletime.crm.dynamics.com"
 
         logging.info(f"BASE CRM URL:{crm_organization_URI}")
-        crm_auth_token_result = OauthClient.get_oauth_token_response(os.environ["AUTH_TOKEN_ENDPOINT"], crm_organization_URI)
+        crm_auth_token_result = OauthClient.get_oauth_token_response(os.environ["DT_AUTH_TOKEN_ENDPOINT"], crm_organization_URI)
 
         if crm_auth_token_result.status_code != 200:
             error_message = f"Note Http Trigger - OAUTH ERROR - Http Status code: {crm_auth_token_result.status_code}, Http Error:{crm_auth_token_result.text}"
