@@ -37,15 +37,16 @@ jobs:
         # stop the build if there are Python syntax errors or undefined names
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         pip install flake8
-        flake8 . --exit-zero --ignore E231,E261   --exclude .git,__pycache__,.venv  --count --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=150 --statistics
+        # exit-zero treats all errors as warnings. 
+        flake8 . --exit-zero --ignore E231,E261 --max-complexity=10 --max-line-length=200  --exclude .git,__pycache__,.venv  --count --show-source --statistics
         popd
 
     - name: 'Run Unit tests'
       shell: bash
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        sudo apt-get install zbar-tools -y
+        sudo apt-get install libzbar0 -y
         python -m pip install --upgrade pip
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
         python -m pip install -r tests/test_requirements.txt 

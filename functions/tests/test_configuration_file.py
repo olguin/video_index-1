@@ -1,4 +1,3 @@
-import datetime
 from shared_code.configuration_file import ConfigurationFile
 import pytest
 import uuid
@@ -55,7 +54,7 @@ def test_get_metadata_values(fake_config_file, fake_work_order):
     """Test load config file """
     config_file = ConfigurationFile(fake_config_file, "dt_config_example.json")
 
-    metadata_url = "{base_url}/api/data/v9.1/msdyn_workorders({query_key})?$expand=msdyn_customerasset($select=msdyn_name;$expand=msdyn_product($select=name,productid)),msdyn_serviceaccount($select=name),msdyn_billingaccount($select=name)"
+    metadata_url = "{base_url}/api/data/v9.1/msdyn_workorders({query_key})?$expand=msdyn_customerasset($select=msdyn_name;$expand=msdyn_product($select=name,productid)),msdyn_serviceaccount($select=name),msdyn_billingaccount($select=name)"  # noqa
 
     base_url = "https://doubletime.crm.dynamics.com"
     work_order_id = str(uuid.uuid4())

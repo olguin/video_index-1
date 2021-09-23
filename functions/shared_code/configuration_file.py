@@ -41,10 +41,9 @@ class ConfigurationFile:
         if storage_auth_token_result.status_code != 200:
             error_message = f"Http Status code: {storage_auth_token_result.status_code}, Http Error:{storage_auth_token_result.text}"
             logging.error(
-                "Error on get_json_file_from_storage_container - "+error_message)
+                "Error on get_json_file_from_storage_container - " + error_message)
             raise RuntimeError(error_message)
         else:
-
             date = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
             storage_request_headers = {
                 'Authorization': 'Bearer ' + storage_auth_token_result.json()["token"],
@@ -60,17 +59,17 @@ class ConfigurationFile:
             if get_blob_result.status_code != 200:
                 error_message = f"Http Status code: {get_blob_result.status_code}, Http Error:{get_blob_result.text}"
                 logging.error(
-                    f"get_json_file_from_blog method - get Blob request - " + error_message)
+                    f"get_json_file_from_blog method - get Blob request - {error_message}")
         return get_blob_result
 
     def get_metadata_definition(self) -> list:
-        if (self.json_file_content == None):
+        if (self.json_file_content is None):
             raise RuntimeError("Error config file not loaded.")
 
         logging.info(f"CONTENT FILE JSON:{self.json_file_content}")
         return self.json_file_content["metadata"]
 
-    def get_metadata_values(self, base_url: str, crm_request_headers: str,  note_dict: dict):
+    def get_metadata_values(self, base_url: str, crm_request_headers: str, note_dict: dict):
         metadata_tags_values = {}
         list_of_metadata_definition = self.get_metadata_definition()
         for metadata_definition in list_of_metadata_definition:
@@ -133,7 +132,7 @@ class ConfigurationFile:
         return reduce(operator.getitem, field_path, data_dict)
 
     def getLanguage(self):
-        if(self.json_file_content == None):
+        if(self.json_file_content is None):
             return "en"
         else:
             return self.json_file_content.get("language", "en")
@@ -142,16 +141,15 @@ class ConfigurationFile:
         sections = [*record]
         for section in sections:
             if(not self.isSectionEnabled(section)):
-                    del record[section]
+                del record[section]
         if("match_count" in record):
             counts = [*record["match_count"]]
             for count in counts:
                 if(not self.isSectionEnabled(count)):
-                        del record["match_count"][count]
-
+                    del record["match_count"][count]
 
     def isSectionEnabled(self, section):
-        if(self.json_file_content == None):
+        if(self.json_file_content is None):
             return True
         else:
             services = self.json_file_content["services"]["video"]
@@ -159,6 +157,3 @@ class ConfigurationFile:
 
     def alwaysIncludedSection(self, section):
         return section in ["header", "path", "id", "match_count"]
-
-
-

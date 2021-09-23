@@ -35,11 +35,11 @@ def test_find_note(fake_note_with_video_attachment):
 
     note_id_value: str = str(uuid.uuid4())
     base_url = 'https://doubletime.crm.dynamics.com'
-    api_uri = base_url+'/api/data/v9.1'+Note.NOTE_ENDPOINT.format(note_id=note_id_value)
+    api_uri = base_url + '/api/data/v9.1' + Note.NOTE_ENDPOINT.format(note_id=note_id_value)
 
     rest_headers = {}
     responses.add(responses.GET, api_uri, json=fake_note_with_video_attachment, status=HTTPStatus.OK)
-    a_note = Note.find(base_url+'/api/data/v9.1', rest_headers, note_id_value)
+    a_note = Note.find(base_url + '/api/data/v9.1', rest_headers, note_id_value)
     assert a_note == Note.from_dict(note_id_value, fake_note_with_video_attachment)
     assert len(responses.calls) == 1
 
@@ -83,7 +83,7 @@ def test_download_attachment_gets_bytearray_from_base64_file(fake_note_with_vide
     note_id_value: str = str(uuid.uuid4())
     base_url = 'https://doubletime.crm.dynamics.com'
 
-    api_uri = base_url+Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
+    api_uri = base_url + Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
     a_note = Note.from_dict(note_id_value, fake_note_with_video_attachment)
     rest_headers = {}
     responses.add(responses.GET, api_uri, json=fake_attachment, status=HTTPStatus.OK)
@@ -113,8 +113,8 @@ def test_get_storage_request_header(fake_note_with_video_attachment):
     assert storage_request_header['Content-Length'] == '1054'
     assert storage_request_header['x-ms-blob-type'] == 'BlockBlob'
     assert storage_request_header['x-ms-date'] == datetime_value
-    assert storage_request_header[meta_prefix+TAG_A] == "value_a"
-    assert storage_request_header[meta_prefix+TAG_B] == "value_b"
+    assert storage_request_header[meta_prefix + TAG_A] == "value_a"
+    assert storage_request_header[meta_prefix + TAG_B] == "value_b"
 
 
 @responses.activate
@@ -130,7 +130,7 @@ def test_upload_attachment_to_container(fake_note_with_video_attachment, fake_at
     account_name = "storage_account_a"
     container = "container_a"
 
-    api_uri = base_url+Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
+    api_uri = base_url + Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
     a_note = Note.from_dict(note_id_value, fake_note_with_video_attachment)
     filename = a_note.filename
 
@@ -165,7 +165,7 @@ def test_upload_attachment_throws_exception_if_storage_api_returns_forbidden_or_
     account_name = "storage_account_a"
     container = "container_a"
 
-    api_uri = base_url+Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
+    api_uri = base_url + Note.ATTACHMENT_ENDPOINT.format(note_id=note_id_value)
     a_note = Note.from_dict(note_id_value, fake_note_with_video_attachment)
     filename = a_note.filename
 
@@ -180,7 +180,7 @@ def test_upload_attachment_throws_exception_if_storage_api_returns_forbidden_or_
     TAG_A = "tag_a"
     TAG_B = "tag_b"
     metadata_tags = {TAG_A: "value_a", TAG_B: "value_b"}
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(Exception):
         a_note.upload_attachment_to_container(downloaded_file, metadata_tags, account_name, container, oauth_url)
 
     responses.add(responses.PUT, blob_storage_endpoint, json={}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
@@ -189,5 +189,5 @@ def test_upload_attachment_throws_exception_if_storage_api_returns_forbidden_or_
     TAG_A = "tag_a"
     TAG_B = "tag_b"
     metadata_tags = {TAG_A: "value_a", TAG_B: "value_b"}
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(Exception):
         a_note.upload_attachment_to_container(downloaded_file, metadata_tags, account_name, container, oauth_url)
