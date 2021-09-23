@@ -6,7 +6,8 @@ import traceback
 import os
 from datetime import datetime
 
-def extract_barcodes(video_file_path, record_id, config): 
+
+def extract_barcodes(video_file_path, record_id, config):
 
     results = {}
     results["values"] = []
@@ -21,89 +22,88 @@ def extract_barcodes(video_file_path, record_id, config):
             val = {
                 "recordId": record_id,
                 "data": {
-                    "barcodes":[]
+                    "barcodes": []
                 },
                 "errors": None,
                 "warnings": [{"message": f"No barcode is detected in video: {video_file_path}"}]
             }
             results["values"].append(val)
 
-        else: 
+        else:
             for element in detected_barcodes:
                 del element["compare_timestamps"]
                 element["text"] = element["barcode"]
 
             record = {
-                    "recordId": record_id,
-                    "data": {
-                        "barcodes": detected_barcodes
-                    },
-                    "errors": None,
-                    "warnings": None
-                    }
+                "recordId": record_id,
+                "data": {
+                    "barcodes": detected_barcodes
+                },
+                "errors": None,
+                "warnings": None
+            }
             results["values"].append(record)
 
     except Exception as ex:
         val = {
-                "recordId": None,
-                "data": {
-                    "barcodes":None
-                },
-                "errors": [{"message": ex.args}],
-                "warnings": [{"message": f"The request failed to process. {traceback.format_exc()}"}]
-            }
+            "recordId": None,
+            "data": {
+                "barcodes": None
+            },
+            "errors": [{"message": ex.args}],
+            "warnings": [{"message": f"The request failed to process. {traceback.format_exc()}"}]
+        }
         results["values"].append(val)
 
-    finally:    
-        return json.dumps(results,ensure_ascii=False)
+    finally:
+        return json.dumps(results, ensure_ascii=False)
+
 
 def detect_barcodes(video_file_path):
     detected_barcodes = list()
     cap = cv2.VideoCapture(video_file_path)
-    i=0 #frame counter
+    i = 0  # frame counter
     while(cap.isOpened()):
         ret = cap.grab()
-        i=i+1 #increment counter
-        if i % 10 == 0: # display only one tenth of the frames, you can change this parameter according to your needs
+        i = i + 1  # increment counter
+        if i % 10 == 0:  # display only one tenth of the frames, you can change this parameter according to your needs
             if (ret != True):
                 break
-            ret, frame = cap.retrieve() #decode frame
+            ret, frame = cap.retrieve()  # decode frame
             for barcode in decode(frame):
                 myData = barcode.data.decode('utf-8')
                 milliseconds = cap.get(cv2.CAP_PROP_POS_MSEC)
-                seconds = milliseconds//1000
-                milliseconds = milliseconds%1000
+                seconds = milliseconds // 1000
+                milliseconds = milliseconds % 1000
                 minutes = 0
                 hours = 0
                 if seconds >= 60:
-                    minutes = seconds//60
+                    minutes = seconds // 60
                     seconds = seconds % 60
                 if minutes >= 60:
-                    hours = minutes//60
+                    hours = minutes // 60
                     minutes = minutes % 60
-                
+
                 startTimeStamp = f'{int(hours)}:{"%02d" % (int(minutes),)}:{"%02d" % (int(seconds),)}'
-                if any(value["barcode"]==myData for value in detected_barcodes):
+                if any(value["barcode"] == myData for value in detected_barcodes):
                     for value in detected_barcodes:
 
-                        #logic for not taking consecutive timestamps
-                        timestamp1 = datetime.strptime(value["compare_timestamps"][len(value["compare_timestamps"]) -1], "%H:%M:%S")
+                        # logic for not taking consecutive timestamps
+                        timestamp1 = datetime.strptime(value["compare_timestamps"][len(value["compare_timestamps"]) - 1], "%H:%M:%S")
                         timestamp2 = datetime.strptime(startTimeStamp, "%H:%M:%S")
 
                         # get diffrence between startTimestamp and last value of compare_timestamps
                         difference = timestamp2 - timestamp1
 
-                        #logic for not taking same value 
+                        # logic for not taking same value
                         current_timestamp = len(value["timestamps"]) - 1
-                        last_timestamp =  value["timestamps"][current_timestamp]['start']
+                        last_timestamp = value["timestamps"][current_timestamp]['start']
 
-                        if(value["barcode"]==myData and last_timestamp != startTimeStamp and startTimeStamp != '0:00:00' and difference.seconds != 0):
-                            if difference.seconds > 1: value["timestamps"].append({"start": startTimeStamp, "end": ""}) 
-                            value["compare_timestamps"].append(startTimeStamp) #add timestamp each time 
-        
+                        if(value["barcode"] == myData and last_timestamp != startTimeStamp and startTimeStamp != '0:00:00' and difference.seconds != 0):
+                            if difference.seconds > 1:
+                                value["timestamps"].append({"start": startTimeStamp, "end": ""})
+                            value["compare_timestamps"].append(startTimeStamp)  # add timestamp each time
+
                 else:
-                    detected_barcodes.append({'barcode': myData, 'timestamps': [{'start': startTimeStamp, "end": "" }], 'compare_timestamps': [startTimeStamp]})
+                    detected_barcodes.append({'barcode': myData, 'timestamps': [{'start': startTimeStamp, "end": ""}], 'compare_timestamps': [startTimeStamp]})
     return detected_barcodes
-
-
-
